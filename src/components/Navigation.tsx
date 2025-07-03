@@ -1,5 +1,9 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import UserProfile from './UserProfile';
 
 interface NavigationProps {
   onHome: () => void;
@@ -8,6 +12,9 @@ interface NavigationProps {
 }
 
 const Navigation: React.FC<NavigationProps> = ({ onHome, onNewUpload, showBackButton }) => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-md border-b border-white/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -37,12 +44,29 @@ const Navigation: React.FC<NavigationProps> = ({ onHome, onNewUpload, showBackBu
               </Button>
             )}
             
-            <Button
-              onClick={onNewUpload}
-              className="btn-accent"
-            >
-              New Upload
-            </Button>
+            {user ? (
+              <>
+                <Button
+                  onClick={onNewUpload}
+                  className="btn-accent"
+                >
+                  New Upload
+                </Button>
+                <UserProfile user={user} />
+              </>
+            ) : (
+              <>
+                {!loading && (
+                  <Button
+                    onClick={() => navigate('/auth')}
+                    variant="ghost"
+                    className="hover-lift"
+                  >
+                    Sign In
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
