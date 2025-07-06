@@ -34,7 +34,43 @@ serve(async (req) => {
         contents: [{
           parts: [
             {
-              text: `Analyze this medicine image and provide detailed information in JSON format. Include: name, generic_name, manufacturer, composition (array), uses (array), dosage, side_effects (array), warnings (array), storage, prescription_required (boolean). If you cannot identify the medicine clearly, return null for unknown fields. Be accurate and only provide information you're confident about.`
+              text: `You are a medical expert AI. Analyze this medicine image and provide comprehensive information in JSON format. 
+
+IMPORTANT INSTRUCTIONS:
+1. Identify the medicine name, brand, and any visible text on the packaging
+2. If you can identify the medicine, provide detailed information for ALL fields
+3. Use your medical knowledge to provide comprehensive details even if not all info is visible on the package
+4. For unknown medicines, research similar medications based on visible ingredients
+5. AVOID returning null values - provide general medical information when specific details aren't available
+6. If you see partial information, extrapolate based on common medical knowledge
+
+Required JSON format:
+{
+  "name": "Medicine brand/trade name",
+  "generic_name": "Active ingredient/generic name", 
+  "manufacturer": "Company name",
+  "composition": ["ingredient1", "ingredient2"],
+  "uses": ["condition1", "condition2", "symptom relief"],
+  "dosage": "Typical dosage information",
+  "side_effects": ["effect1", "effect2", "effect3"],
+  "warnings": ["warning1", "warning2", "precaution"],
+  "storage": "Storage conditions and temperature",
+  "prescription_required": true/false
+}
+
+For each field:
+- name: Extract from package or identify from ingredients
+- generic_name: Provide the active pharmaceutical ingredient
+- manufacturer: Company name if visible
+- composition: List all active ingredients with strengths if visible
+- uses: Provide 3-5 medical conditions/symptoms this medicine treats
+- dosage: Give standard adult dosage recommendations
+- side_effects: List 4-6 common side effects
+- warnings: Include 3-4 important precautions or contraindications
+- storage: Specify temperature and storage conditions
+- prescription_required: Determine if this requires prescription
+
+Be thorough and provide useful medical information even when the image quality is limited.`
             },
             {
               inlineData: {
