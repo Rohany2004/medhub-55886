@@ -8,6 +8,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import MedExplain from "./pages/MedExplain";
+import MultipleMedicines from "./pages/MultipleMedicines";
 
 const queryClient = new QueryClient();
 
