@@ -1,110 +1,17 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
-import HeroSection from '@/components/HeroSection';
-import MedicineUpload from '@/components/MedicineUpload';
-import MedicineResults from '@/components/MedicineResults';
-import { FileText, Camera, Upload } from 'lucide-react';
-
-type AppState = 'home' | 'upload' | 'results';
-
-interface MedicineInfo {
-  name?: string;
-  generic_name?: string;
-  manufacturer?: string;
-  composition?: string[];
-  uses?: string[];
-  dosage?: string;
-  side_effects?: string[];
-  warnings?: string[];
-  storage?: string;
-  prescription_required?: boolean;
-}
+import { FileText, Camera, Pill, Shield, Zap, Users } from 'lucide-react';
 
 const Index = () => {
-  const [currentState, setCurrentState] = useState<AppState>('home');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [medicineInfo, setMedicineInfo] = useState<MedicineInfo | null>(null);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
-  const { toast } = useToast();
-
-  const handleGetStarted = () => {
-    setCurrentState('upload');
-  };
-
   const handleHome = () => {
-    setCurrentState('home');
-    setMedicineInfo(null);
-    setUploadedImageUrl('');
+    // Already on home page
   };
 
   const handleNewUpload = () => {
-    setCurrentState('upload');
-    setMedicineInfo(null);
-    setUploadedImageUrl('');
-  };
-
-  const analyzeMedicineWithSupabase = async (imageBase64: string) => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('analyze-medicine', {
-        body: { imageBase64 }
-      });
-
-      if (error) throw error;
-      return data.medicineInfo;
-    } catch (error) {
-      console.error('Medicine analysis error:', error);
-      throw error;
-    }
-  };
-
-  const handleImageUpload = async (file: File) => {
-    setIsAnalyzing(true);
-    setCurrentState('results');
-
-    try {
-      // Convert file to base64
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64 = e.target?.result as string;
-        const base64Data = base64.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-        setUploadedImageUrl(base64);
-
-        try {
-          const result = await analyzeMedicineWithSupabase(base64Data);
-          setMedicineInfo(result);
-          
-          toast({
-            title: "Analysis Complete",
-            description: "Medicine information has been successfully identified.",
-          });
-        } catch (error) {
-          console.error('Analysis error:', error);
-          toast({
-            title: "Analysis Failed",
-            description: "Unable to analyze the medicine. Please try again with a clearer image.",
-            variant: "destructive",
-          });
-          
-          setCurrentState('upload');
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Upload error:', error);
-      setIsAnalyzing(false);
-      setCurrentState('upload');
-      
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload the image. Please try again.",
-        variant: "destructive",
-      });
-    }
+    // Navigate to medicine identifier
+    window.location.href = '/medicine-identifier';
   };
 
   return (
@@ -112,114 +19,123 @@ const Index = () => {
       <Navigation 
         onHome={handleHome}
         onNewUpload={handleNewUpload}
-        showBackButton={currentState !== 'home'}
+        showBackButton={false}
       />
       
       <div className="pt-16">
-        {currentState === 'home' && (
-          <div>
-            <HeroSection onGetStarted={handleGetStarted} />
-            
-            {/* New Features Section */}
-            <div className="py-16 px-4 bg-gradient-to-b from-background to-muted/20">
-              <div className="max-w-6xl mx-auto text-center">
-                <h2 className="text-3xl font-bold mb-4">Explore Our Features</h2>
-                <p className="text-muted-foreground mb-12">
-                  Comprehensive medical analysis tools at your fingertips
+        {/* Hero Section */}
+        <div className="min-h-screen flex items-center justify-center px-4 py-12">
+          <div className="text-center max-w-6xl mx-auto">
+            <div className="animate-fade-in mb-12">
+              <div className="mx-auto mb-8 w-32 h-32 rounded-full glass-card flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Pill className="w-10 h-10 text-white" />
+                </div>
+              </div>
+              
+              <h1 className="text-6xl font-bold text-foreground mb-6">
+                Medical AI Assistant
+              </h1>
+              
+              <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto">
+                Your intelligent companion for medicine identification and medical report analysis. 
+                Powered by advanced AI technology for accurate and reliable healthcare insights.
+              </p>
+            </div>
+
+            {/* Main Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Camera className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-3xl font-semibold mb-4">Medicine Identifier</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Identify medicines instantly by uploading photos. Get detailed information about 
+                  composition, uses, dosage, and safety warnings for single or multiple medicines.
                 </p>
+                <Button 
+                  onClick={() => window.location.href = '/medicine-identifier'}
+                  className="btn-medical w-full text-lg py-4"
+                >
+                  Identify Your Medicine
+                </Button>
+              </div>
+              
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
+                  <FileText className="w-10 h-10 text-accent" />
+                </div>
+                <h3 className="text-3xl font-semibold mb-4">MedExplain</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Transform complex medical reports into simple, understandable insights. 
+                  Get explanations of medical terms, diagnosis, and recommended next steps.
+                </p>
+                <Button 
+                  onClick={() => window.location.href = '/medexplain'}
+                  className="btn-accent w-full text-lg py-4"
+                >
+                  Analyze Medical Reports
+                </Button>
+              </div>
+            </div>
+
+            {/* Why Choose Us Section */}
+            <div className="mb-16">
+              <h2 className="text-4xl font-bold text-center mb-12">
+                Why Choose Our Platform?
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="glass-card p-6 rounded-xl text-center hover-lift">
+                  <Zap className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <h4 className="text-xl font-semibold mb-2">Lightning Fast</h4>
+                  <p className="text-muted-foreground">
+                    Get instant results with our advanced AI processing technology.
+                  </p>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <div className="glass-card p-6 rounded-xl hover-lift">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                      <FileText className="w-8 h-8 text-primary" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">MedExplain</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Transform complex medical reports into simple, understandable insights with AI-powered analysis.
-                    </p>
-                    <Button 
-                      onClick={() => window.location.href = '/medexplain'}
-                      className="btn-medical w-full"
-                    >
-                      Try MedExplain
-                    </Button>
-                  </div>
-                  
-                  <div className="glass-card p-6 rounded-xl hover-lift">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
-                      <Camera className="w-8 h-8 text-accent" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">Single Medicine</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Identify and analyze individual medicine photos for detailed information and usage guidelines.
-                    </p>
-                    <Button 
-                      onClick={handleGetStarted}
-                      className="btn-accent w-full"
-                    >
-                      Analyze Medicine
-                    </Button>
-                  </div>
-                  
-                  <div className="glass-card p-6 rounded-xl hover-lift">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-success" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-3">Multiple Medicines</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Upload and analyze multiple medicine photos at once for comprehensive medication review.
-                    </p>
-                    <Button 
-                      onClick={() => window.location.href = '/multiple-medicines'}
-                      className="bg-success hover:bg-success/90 text-white w-full"
-                    >
-                      Analyze Multiple
-                    </Button>
-                  </div>
+                <div className="glass-card p-6 rounded-xl text-center hover-lift">
+                  <Shield className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <h4 className="text-xl font-semibold mb-2">Secure & Private</h4>
+                  <p className="text-muted-foreground">
+                    Your medical data is processed securely with enterprise-grade encryption.
+                  </p>
+                </div>
+                
+                <div className="glass-card p-6 rounded-xl text-center hover-lift">
+                  <Users className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <h4 className="text-xl font-semibold mb-2">User-Friendly</h4>
+                  <p className="text-muted-foreground">
+                    Simple interface designed for everyone, with clear explanations.
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        )}
 
-        {currentState === 'upload' && (
-          <div className="min-h-screen flex items-center justify-center px-4 py-12">
-            <div className="w-full max-w-4xl">
-              <div className="text-center mb-12 animate-fade-in">
-                <h1 className="text-4xl font-bold text-foreground mb-4">
-                  Upload Medicine Photo
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  Take or upload a clear photo of your medicine for instant identification
-                </p>
-              </div>
-              
-              <MedicineUpload 
-                onImageUpload={handleImageUpload} 
-                isLoading={isAnalyzing}
-              />
-            </div>
-          </div>
-        )}
-
-        {currentState === 'results' && (
-          <div className="min-h-screen px-4 py-12">
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="text-4xl font-bold text-foreground mb-4">
-                Medicine Analysis Results
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Detailed information about your medicine
+            {/* Call to Action */}
+            <div className="glass-card p-8 rounded-xl">
+              <h3 className="text-3xl font-bold mb-4">Ready to Get Started?</h3>
+              <p className="text-xl text-muted-foreground mb-6">
+                Choose the service that best fits your needs and experience the power of AI-assisted healthcare.
               </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => window.location.href = '/medicine-identifier'}
+                  className="btn-medical text-lg px-8 py-4"
+                >
+                  Start Medicine Identification
+                </Button>
+                <Button 
+                  onClick={() => window.location.href = '/medexplain'}
+                  className="btn-accent text-lg px-8 py-4"
+                >
+                  Analyze Medical Reports
+                </Button>
+              </div>
             </div>
-            
-            <MedicineResults 
-              medicineInfo={medicineInfo}
-              isLoading={isAnalyzing}
-              uploadedImage={uploadedImageUrl}
-            />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
