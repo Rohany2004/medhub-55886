@@ -1,0 +1,150 @@
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { files } = await req.json();
+    
+    if (!files || files.length === 0) {
+      throw new Error('No files provided');
+    }
+
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!geminiApiKey) {
+      throw new Error('Gemini API key not configured');
+    }
+
+    console.log(`Analyzing ${files.length} medical report(s) with Gemini API...`);
+
+    // Process multiple files
+    const analysisPromises = files.map(async (fileData: string) => {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              {
+                text: `You are a medical expert AI assistant. Analyze this medical report/document and provide a comprehensive analysis in JSON format.
+
+IMPORTANT INSTRUCTIONS:
+1. Extract and interpret all medical information from the document
+2. Simplify complex medical terms for patient understanding
+3. Identify key findings, diagnoses, and recommendations
+4. Assess risk levels based on the findings
+5. Provide actionable next steps and recommendations
+
+Required JSON format:
+{
+  "summary": "Brief overview of the report findings",
+  "medical_terms": [
+    {
+      "term": "Medical term found in report",
+      "explanation": "Simple explanation for patients"
+    }
+  ],
+  "diagnosis": ["Primary diagnosis", "Secondary diagnosis"],
+  "key_findings": ["Important finding 1", "Important finding 2"],
+  "recommendations": ["Recommendation 1", "Recommendation 2"],
+  "next_steps": ["Next step 1", "Next step 2"],
+  "risk_level": "low|medium|high|unknown"
+}
+
+Guidelines:
+- Provide clear, patient-friendly explanations
+- Include 3-5 key findings if available
+- List 3-4 practical recommendations
+- Suggest 2-3 specific next steps
+- Assess risk level based on findings
+- Explain medical terminology in simple terms
+- Be comprehensive but accessible to non-medical users
+
+Analyze the document thoroughly and provide valuable insights that help patients understand their medical reports.`
+              },
+              {
+                inlineData: {
+                  mimeType: "image/jpeg",
+                  data: fileData
+                }
+              }
+            ]
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            topK: 32,
+            topP: 1,
+            maxOutputTokens: 3000,
+          }
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Gemini API Error:', response.status, errorText);
+        throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (textResponse) {
+        const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          return JSON.parse(jsonMatch[0]);
+        }
+      }
+      
+      return null;
+    });
+
+    // Wait for all analyses to complete
+    const results = await Promise.all(analysisPromises);
+    const validResults = results.filter(result => result !== null);
+
+    if (validResults.length === 0) {
+      throw new Error('No valid analysis results from any file');
+    }
+
+    // If multiple files, combine the results intelligently
+    let combinedAnalysis;
+    if (validResults.length === 1) {
+      combinedAnalysis = validResults[0];
+    } else {
+      // Combine multiple analyses
+      combinedAnalysis = {
+        summary: `Analysis of ${validResults.length} medical documents: ${validResults.map(r => r.summary).join(' | ')}`,
+        medical_terms: validResults.flatMap(r => r.medical_terms || []).slice(0, 10),
+        diagnosis: [...new Set(validResults.flatMap(r => r.diagnosis || []))],
+        key_findings: [...new Set(validResults.flatMap(r => r.key_findings || []))],
+        recommendations: [...new Set(validResults.flatMap(r => r.recommendations || []))],
+        next_steps: [...new Set(validResults.flatMap(r => r.next_steps || []))],
+        risk_level: validResults.some(r => r.risk_level === 'high') ? 'high' : 
+                   validResults.some(r => r.risk_level === 'medium') ? 'medium' : 'low'
+      };
+    }
+
+    console.log('Medical report analysis completed successfully');
+    
+    return new Response(JSON.stringify({ analysis: combinedAnalysis }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Error in analyze-reports function:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

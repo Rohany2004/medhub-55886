@@ -1,4 +1,11 @@
+
 project_id = "oodpmxucntrcultdqfch"
 
 [functions.analyze-medicine]
+verify_jwt = false
+
+[functions.analyze-reports]
+verify_jwt = false
+
+[functions.analyze-multiple-medicines]
 verify_jwt = false

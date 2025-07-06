@@ -20,6 +20,8 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/medexplain" element={<MedExplain />} />
+            <Route path="/multiple-medicines" element={<MultipleMedicines />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -5,6 +5,7 @@ import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import MedicineUpload from '@/components/MedicineUpload';
 import MedicineResults from '@/components/MedicineResults';
+import { FileText, Camera, Upload } from 'lucide-react';
 
 type AppState = 'home' | 'upload' | 'results';
 
@@ -116,7 +117,69 @@ const Index = () => {
       
       <div className="pt-16">
         {currentState === 'home' && (
-          <HeroSection onGetStarted={handleGetStarted} />
+          <div>
+            <HeroSection onGetStarted={handleGetStarted} />
+            
+            {/* New Features Section */}
+            <div className="py-16 px-4 bg-gradient-to-b from-background to-muted/20">
+              <div className="max-w-6xl mx-auto text-center">
+                <h2 className="text-3xl font-bold mb-4">Explore Our Features</h2>
+                <p className="text-muted-foreground mb-12">
+                  Comprehensive medical analysis tools at your fingertips
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="glass-card p-6 rounded-xl hover-lift">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                      <FileText className="w-8 h-8 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-3">MedExplain</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Transform complex medical reports into simple, understandable insights with AI-powered analysis.
+                    </p>
+                    <Button 
+                      onClick={() => window.location.href = '/medexplain'}
+                      className="btn-medical w-full"
+                    >
+                      Try MedExplain
+                    </Button>
+                  </div>
+                  
+                  <div className="glass-card p-6 rounded-xl hover-lift">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-accent/10 flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-accent" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-3">Single Medicine</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Identify and analyze individual medicine photos for detailed information and usage guidelines.
+                    </p>
+                    <Button 
+                      onClick={handleGetStarted}
+                      className="btn-accent w-full"
+                    >
+                      Analyze Medicine
+                    </Button>
+                  </div>
+                  
+                  <div className="glass-card p-6 rounded-xl hover-lift">
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-success" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-3">Multiple Medicines</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Upload and analyze multiple medicine photos at once for comprehensive medication review.
+                    </p>
+                    <Button 
+                      onClick={() => window.location.href = '/multiple-medicines'}
+                      className="bg-success hover:bg-success/90 text-white w-full"
+                    >
+                      Analyze Multiple
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {currentState === 'upload' && (
