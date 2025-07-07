@@ -36,7 +36,14 @@ serve(async (req) => {
           contents: [{
             parts: [
               {
-                text: `You are a medical expert AI assistant. Analyze this medical report/document and provide a comprehensive analysis in JSON format.
+                text: `You are a medical expert AI assistant. First, analyze this document/image to determine if it contains medical reports, lab results, prescriptions, or medical documents.
+
+CRITICAL VALIDATION RULES:
+1. If the document/image does NOT contain medical reports, lab results, prescriptions, medical charts, hospital documents, or any medical information, respond with exactly: "NOT_MEDICAL_REPORT"
+2. If the document contains random text, personal documents, receipts, or anything non-medical, respond with exactly: "NOT_MEDICAL_REPORT"
+3. Only proceed with analysis if the document clearly shows medical reports or medical information
+
+If the document IS a medical report, provide a comprehensive analysis in JSON format:
 
 IMPORTANT INSTRUCTIONS:
 1. Extract and interpret all medical information from the document
@@ -99,6 +106,11 @@ Analyze the document thoroughly and provide valuable insights that help patients
       const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (textResponse) {
+        // Check if the content is not a medical report
+        if (textResponse.includes('NOT_MEDICAL_REPORT')) {
+          throw new Error('This is not a medical report. Please upload medical reports, lab results, prescriptions, or other medical documents.');
+        }
+
         const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           return JSON.parse(jsonMatch[0]);

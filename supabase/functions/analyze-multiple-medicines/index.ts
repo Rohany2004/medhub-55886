@@ -36,7 +36,14 @@ serve(async (req) => {
           contents: [{
             parts: [
               {
-                text: `You are a medical expert AI. Analyze this medicine image and provide comprehensive information in JSON format. 
+                text: `You are a medical expert AI. First, analyze this image to determine if it contains medicine, pharmaceutical products, or medical items.
+
+CRITICAL VALIDATION RULES:
+1. If the image does NOT contain medicine, pills, tablets, capsules, medical bottles, medicine packaging, pharmaceutical products, or any medical items, respond with exactly: "NOT_MEDICAL_CONTENT"
+2. If the image contains random objects, food, people, animals, landscapes, or anything non-medical, respond with exactly: "NOT_MEDICAL_CONTENT"
+3. Only proceed with analysis if the image clearly shows medicine or pharmaceutical products
+
+If the image IS medical/pharmaceutical, provide comprehensive information in JSON format:
 
 IMPORTANT INSTRUCTIONS:
 1. Identify the medicine name, brand, and any visible text on the packaging
@@ -101,6 +108,14 @@ Be thorough and provide useful medical information even when the image quality i
       const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
       
       if (textResponse) {
+        // Check if the content is not medical
+        if (textResponse.includes('NOT_MEDICAL_CONTENT')) {
+          return { 
+            index, 
+            error: `Image ${index + 1} is not a medicine image. Please upload photos of medicine, pills, tablets, or pharmaceutical products.` 
+          };
+        }
+
         const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           try {
