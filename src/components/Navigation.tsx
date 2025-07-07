@@ -33,9 +33,7 @@ const Navigation: React.FC<NavigationProps> = ({
 
           {/* Navigation Items */}
           <div className="flex items-center gap-4">
-            {showBackButton && <Button onClick={onHome} variant="ghost" className="hover-lift">
-                Back to Home
-              </Button>}
+            {showBackButton && <Button onClick={onHome} variant="ghost" className="hover-lift">Back</Button>}
             
             {user ? <>
                 
