@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
+import Breadcrumb from '@/components/Breadcrumb';
+import ExpiryAlert from '@/components/ExpiryAlert';
+import { SkeletonGrid } from '@/components/SkeletonCard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,10 +100,18 @@ const MyMedicines = () => {
     return (
       <div className="min-h-screen">
         <Navigation onHome={handleHome} onNewUpload={handleNewUpload} showBackButton={true} />
-        <div className="pt-16 flex items-center justify-center min-h-screen">
-          <div className="animate-pulse-slow text-center">
-            <Pill className="w-16 h-16 mx-auto mb-4 text-primary" />
-            <p className="text-xl text-muted-foreground">Loading your medicines...</p>
+        <div className="pt-16 px-4 py-12">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-8">
+              <Breadcrumb items={[{ label: 'My Medicines', active: true }]} />
+            </div>
+            <div className="text-center mb-12 animate-fade-in">
+              <div className="animate-pulse-slow">
+                <Pill className="w-16 h-16 mx-auto mb-4 text-primary" />
+                <p className="text-xl text-muted-foreground">Loading your medicines...</p>
+              </div>
+            </div>
+            <SkeletonGrid count={6} />
           </div>
         </div>
       </div>
@@ -113,6 +124,10 @@ const MyMedicines = () => {
       
       <div className="pt-16 px-4 py-12">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-8">
+            <Breadcrumb items={[{ label: 'My Medicines', active: true }]} />
+          </div>
+          
           <div className="text-center mb-12 animate-fade-in">
             <div className="mx-auto mb-8 w-24 h-24 rounded-full glass-card flex items-center justify-center">
               <Pill className="w-12 h-12 text-primary" />
@@ -194,9 +209,7 @@ const MyMedicines = () => {
                     {medicine.expiry_date && (
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          Expires: {new Date(medicine.expiry_date).toLocaleDateString()}
-                        </span>
+                        <ExpiryAlert expiryDate={medicine.expiry_date} />
                       </div>
                     )}
 

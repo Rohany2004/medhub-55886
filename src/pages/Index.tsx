@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
+import FloatingMedicalIcons from '@/components/FloatingMedicalIcons';
 import { FileText, Camera, Pill, Shield, Zap, Users, Edit } from 'lucide-react';
 const Index = () => {
   const handleHome = () => {
@@ -15,8 +16,9 @@ const Index = () => {
       
       <div className="pt-16">
         {/* Hero Section */}
-        <div className="min-h-screen flex items-center justify-center px-4 py-12">
-          <div className="text-center max-w-6xl mx-auto">
+        <div className="min-h-screen flex items-center justify-center px-4 py-12 relative">
+          <FloatingMedicalIcons />
+          <div className="text-center max-w-6xl mx-auto relative z-10">
             <div className="animate-fade-in mb-12">
               <div className="mx-auto mb-8 w-32 h-32 rounded-full glass-card flex items-center justify-center">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">

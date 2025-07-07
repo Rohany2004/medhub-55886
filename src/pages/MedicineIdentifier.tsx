@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
+import Breadcrumb from '@/components/Breadcrumb';
+import ImagePreview from '@/components/ImagePreview';
 import EnhancedMedicineUpload from '@/components/EnhancedMedicineUpload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -137,6 +139,9 @@ const MedicineIdentifier = () => {
       <div className="pt-16">
         {currentState === 'home' && (
           <div className="min-h-screen px-4 py-12">
+            <div className="max-w-6xl mx-auto mb-8">
+              <Breadcrumb items={[{ label: 'Medicine Identifier', active: true }]} />
+            </div>
             <div className="text-center mb-16 animate-fade-in">
               <div className="mx-auto mb-8 w-24 h-24 rounded-full glass-card flex items-center justify-center">
                 <Pill className="w-12 h-12 text-primary" />
@@ -175,6 +180,12 @@ const MedicineIdentifier = () => {
         {currentState === 'upload' && (
           <div className="min-h-screen flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-4xl">
+              <div className="mb-8">
+                <Breadcrumb items={[
+                  { label: 'Medicine Identifier', onClick: () => setCurrentState('home') },
+                  { label: 'Upload', active: true }
+                ]} />
+              </div>
               <div className="text-center mb-12 animate-fade-in">
                 <h1 className="text-4xl font-bold text-foreground mb-4">
                   Upload Medicine Photos
@@ -194,6 +205,13 @@ const MedicineIdentifier = () => {
 
         {currentState === 'results' && (
           <div className="min-h-screen px-4 py-12">
+            <div className="max-w-7xl mx-auto mb-8">
+              <Breadcrumb items={[
+                { label: 'Medicine Identifier', onClick: () => setCurrentState('home') },
+                { label: 'Results', active: true }
+              ]} />
+            </div>
+            
             <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-4xl font-bold text-foreground mb-4">
                 Medicine Analysis Results
@@ -222,11 +240,12 @@ const MedicineIdentifier = () => {
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
                             {uploadedImages[result.index] && (
-                              <img
-                                src={uploadedImages[result.index]}
-                                alt={`Medicine ${result.index + 1}`}
-                                className="w-16 h-16 object-cover rounded-lg"
-                              />
+                              <div className="w-16 h-16 rounded-lg overflow-hidden">
+                                <ImagePreview 
+                                  images={[uploadedImages[result.index]]}
+                                  className="w-full h-full"
+                                />
+                              </div>
                             )}
                             <div>
                               <CardTitle className="text-lg">
