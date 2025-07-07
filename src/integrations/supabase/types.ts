@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      medicine_entries: {
+        Row: {
+          additional_notes: string | null
+          created_at: string
+          daily_dosage: string | null
+          expiry_date: string | null
+          id: string
+          manufacturer: string | null
+          medicine_name: string
+          photo_url: string | null
+          price: number | null
+          updated_at: string
+          use_case: string | null
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          created_at?: string
+          daily_dosage?: string | null
+          expiry_date?: string | null
+          id?: string
+          manufacturer?: string | null
+          medicine_name: string
+          photo_url?: string | null
+          price?: number | null
+          updated_at?: string
+          use_case?: string | null
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          created_at?: string
+          daily_dosage?: string | null
+          expiry_date?: string | null
+          id?: string
+          manufacturer?: string | null
+          medicine_name?: string
+          photo_url?: string | null
+          price?: number | null
+          updated_at?: string
+          use_case?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

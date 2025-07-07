@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import MedExplain from "./pages/MedExplain";
 import MedicineIdentifier from "./pages/MedicineIdentifier";
+import ManualMedicineEntry from "./pages/ManualMedicineEntry";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/medexplain" element={<MedExplain />} />
             <Route path="/medicine-identifier" element={<MedicineIdentifier />} />
+            <Route path="/manual-medicine-entry" element={<ManualMedicineEntry />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
-import { FileText, Camera, Pill, Shield, Zap, Users } from 'lucide-react';
+import { FileText, Camera, Pill, Shield, Zap, Users, Edit } from 'lucide-react';
 
 const Index = () => {
   const handleHome = () => {
@@ -44,7 +44,7 @@ const Index = () => {
             </div>
 
             {/* Main Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               <div className="glass-card p-8 rounded-xl text-center hover-lift">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Camera className="w-10 h-10 text-primary" />
@@ -76,6 +76,23 @@ const Index = () => {
                   className="btn-accent w-full text-lg py-4"
                 >
                   Analyze Medical Reports
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <Edit className="w-10 h-10 text-secondary" />
+                </div>
+                <h3 className="text-3xl font-semibold mb-4">Manual Medicine Entry</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Manually add medicine details with photo upload. Use AI to auto-fill information 
+                  or enter everything yourself for complete medicine tracking.
+                </p>
+                <Button 
+                  onClick={() => window.location.href = '/manual-medicine-entry'}
+                  className="btn-secondary w-full text-lg py-4"
+                >
+                  Add Medicine Manually
                 </Button>
               </div>
             </div>
