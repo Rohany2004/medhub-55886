@@ -1,26 +1,17 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 import { FileText, Camera, Pill, Shield, Zap, Users, Edit } from 'lucide-react';
-
 const Index = () => {
   const handleHome = () => {
     // Already on home page
   };
-
   const handleNewUpload = () => {
     // Navigate to medicine identifier
     window.location.href = '/medicine-identifier';
   };
-
-  return (
-    <div className="min-h-screen">
-      <Navigation 
-        onHome={handleHome}
-        onNewUpload={handleNewUpload}
-        showBackButton={false}
-      />
+  return <div className="min-h-screen">
+      <Navigation onHome={handleHome} onNewUpload={handleNewUpload} showBackButton={false} />
       
       <div className="pt-16">
         {/* Hero Section */}
@@ -54,10 +45,7 @@ const Index = () => {
                   Identify medicines instantly by uploading photos. Get detailed information about 
                   composition, uses, dosage, and safety warnings for single or multiple medicines.
                 </p>
-                <Button 
-                  onClick={() => window.location.href = '/medicine-identifier'}
-                  className="btn-medical w-full text-lg py-4"
-                >
+                <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical w-full text-lg py-4">
                   Identify Your Medicine
                 </Button>
               </div>
@@ -71,10 +59,7 @@ const Index = () => {
                   Transform complex medical reports into simple, understandable insights. 
                   Get explanations of medical terms, diagnosis, and recommended next steps.
                 </p>
-                <Button 
-                  onClick={() => window.location.href = '/medexplain'}
-                  className="btn-accent w-full text-lg py-4"
-                >
+                <Button onClick={() => window.location.href = '/medexplain'} className="btn-accent w-full text-lg py-4">
                   Analyze Medical Reports
                 </Button>
               </div>
@@ -83,15 +68,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Edit className="w-10 h-10 text-secondary" />
                 </div>
-                <h3 className="text-3xl font-semibold mb-4">Manual Medicine Entry</h3>
+                <h3 className="text-3xl font-semibold mb-4">Medicine Entry</h3>
                 <p className="text-muted-foreground mb-6 text-lg">
                   Manually add medicine details with photo upload. Use AI to auto-fill information 
                   or enter everything yourself for complete medicine tracking.
                 </p>
-                <Button 
-                  onClick={() => window.location.href = '/manual-medicine-entry'}
-                  className="btn-secondary w-full text-lg py-4"
-                >
+                <Button onClick={() => window.location.href = '/manual-medicine-entry'} className="btn-secondary w-full text-lg py-4">
                   Add Medicine Manually
                 </Button>
               </div>
@@ -137,16 +119,10 @@ const Index = () => {
                 Choose the service that best fits your needs and experience the power of AI-assisted healthcare.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  onClick={() => window.location.href = '/medicine-identifier'}
-                  className="btn-medical text-lg px-8 py-4"
-                >
+                <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg px-8 py-4">
                   Start Medicine Identification
                 </Button>
-                <Button 
-                  onClick={() => window.location.href = '/medexplain'}
-                  className="btn-accent text-lg px-8 py-4"
-                >
+                <Button onClick={() => window.location.href = '/medexplain'} className="btn-accent text-lg px-8 py-4">
                   Analyze Medical Reports
                 </Button>
               </div>
@@ -154,8 +130,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
