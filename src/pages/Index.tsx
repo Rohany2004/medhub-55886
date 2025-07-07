@@ -127,20 +127,7 @@ const Index = () => {
             </div>
 
             {/* Call to Action */}
-            <div className="glass-card p-8 rounded-xl">
-              <h3 className="text-3xl font-bold mb-4">Ready to Get Started?</h3>
-              <p className="text-xl text-muted-foreground mb-6">
-                Choose the service that best fits your needs and experience the power of AI-assisted healthcare.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg px-8 py-4">
-                  Start Medicine Identification
-                </Button>
-                <Button onClick={() => window.location.href = '/medexplain'} className="btn-accent text-lg px-8 py-4">
-                  Analyze Medical Reports
-                </Button>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
