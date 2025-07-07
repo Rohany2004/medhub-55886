@@ -1,16 +1,13 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Navigation from '@/components/Navigation';
-import MedicineUpload from '@/components/MedicineUpload';
 import EnhancedMedicineUpload from '@/components/EnhancedMedicineUpload';
-import MedicineResults from '@/components/MedicineResults';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Pill, AlertTriangle, Info, Camera, Upload } from 'lucide-react';
+import { Pill, AlertTriangle, Upload } from 'lucide-react';
 
-type IdentifierState = 'home' | 'single-upload' | 'multiple-upload' | 'single-results' | 'multiple-results';
+type IdentifierState = 'home' | 'upload' | 'results';
 
 interface MedicineInfo {
   name?: string;
@@ -34,44 +31,23 @@ interface AnalysisResult {
 const MedicineIdentifier = () => {
   const [currentState, setCurrentState] = useState<IdentifierState>('home');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [medicineInfo, setMedicineInfo] = useState<MedicineInfo | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('');
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleHome = () => {
     setCurrentState('home');
-    setMedicineInfo(null);
     setAnalysisResults([]);
-    setUploadedImageUrl('');
     setUploadedImages([]);
   };
 
   const handleNewUpload = () => {
     setCurrentState('home');
-    setMedicineInfo(null);
     setAnalysisResults([]);
-    setUploadedImageUrl('');
     setUploadedImages([]);
   };
 
-  const analyzeSingleMedicineWithSupabase = async (imageBase64: string) => {
-    try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('analyze-medicine', {
-        body: { imageBase64 }
-      });
-
-      if (error) throw error;
-      return data.medicineInfo;
-    } catch (error) {
-      console.error('Medicine analysis error:', error);
-      throw error;
-    }
-  };
-
-  const analyzeMultipleMedicinesWithSupabase = async (files: File[]) => {
+  const analyzeMedicinesWithSupabase = async (files: File[]) => {
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       
@@ -89,67 +65,32 @@ const MedicineIdentifier = () => {
         })
       );
 
-      const { data, error } = await supabase.functions.invoke('analyze-multiple-medicines', {
-        body: { images: imagesData }
-      });
+      if (files.length === 1) {
+        // Single medicine analysis
+        const { data, error } = await supabase.functions.invoke('analyze-medicine', {
+          body: { imageBase64: imagesData[0] }
+        });
 
-      if (error) throw error;
-      return data.results;
+        if (error) throw error;
+        return [{ index: 0, result: data.medicineInfo }];
+      } else {
+        // Multiple medicines analysis
+        const { data, error } = await supabase.functions.invoke('analyze-multiple-medicines', {
+          body: { images: imagesData }
+        });
+
+        if (error) throw error;
+        return data.results;
+      }
     } catch (error) {
-      console.error('Multiple medicines analysis error:', error);
+      console.error('Medicine analysis error:', error);
       throw error;
     }
   };
 
-  const handleSingleImageUpload = async (file: File) => {
+  const handleImageUpload = async (files: File[]) => {
     setIsAnalyzing(true);
-    setCurrentState('single-results');
-
-    try {
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        const base64 = e.target?.result as string;
-        const base64Data = base64.split(',')[1];
-        setUploadedImageUrl(base64);
-
-        try {
-          const result = await analyzeSingleMedicineWithSupabase(base64Data);
-          setMedicineInfo(result);
-          
-          toast({
-            title: "Analysis Complete",
-            description: "Medicine information has been successfully identified.",
-          });
-        } catch (error) {
-          console.error('Analysis error:', error);
-          toast({
-            title: "Analysis Failed",
-            description: "Unable to analyze the medicine. Please try again with a clearer image.",
-            variant: "destructive",
-          });
-          
-          setCurrentState('single-upload');
-        } finally {
-          setIsAnalyzing(false);
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Upload error:', error);
-      setIsAnalyzing(false);
-      setCurrentState('single-upload');
-      
-      toast({
-        title: "Upload Failed",
-        description: "Failed to upload the image. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleMultipleImageUpload = async (files: File[]) => {
-    setIsAnalyzing(true);
-    setCurrentState('multiple-results');
+    setCurrentState('results');
 
     try {
       const imageUrls = await Promise.all(
@@ -163,13 +104,13 @@ const MedicineIdentifier = () => {
       );
       setUploadedImages(imageUrls);
 
-      const results = await analyzeMultipleMedicinesWithSupabase(files);
+      const results = await analyzeMedicinesWithSupabase(files);
       setAnalysisResults(results);
       
       const successCount = results.filter((r: AnalysisResult) => !r.error).length;
       toast({
         title: "Analysis Complete",
-        description: `Successfully analyzed ${successCount} out of ${files.length} medicine images.`,
+        description: `Successfully analyzed ${successCount} out of ${files.length} medicine image${files.length > 1 ? 's' : ''}.`,
       });
     } catch (error) {
       console.error('Analysis error:', error);
@@ -179,7 +120,7 @@ const MedicineIdentifier = () => {
         variant: "destructive",
       });
       
-      setCurrentState('multiple-upload');
+      setCurrentState('upload');
     } finally {
       setIsAnalyzing(false);
     }
@@ -207,115 +148,58 @@ const MedicineIdentifier = () => {
               
               <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">
                 Identify and analyze your medicines with AI-powered recognition. 
-                Upload single or multiple medicine photos for instant detailed information.
+                Upload one or multiple medicine photos for instant detailed information.
               </p>
             </div>
 
-            <div className="max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
-                    <Camera className="w-8 h-8 text-primary" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4">Single Medicine</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Upload one medicine photo for detailed analysis and comprehensive information.
-                  </p>
-                  <Button 
-                    onClick={() => setCurrentState('single-upload')}
-                    className="btn-medical w-full"
-                  >
-                    Analyze Single Medicine
-                  </Button>
+            <div className="max-w-2xl mx-auto">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Upload className="w-10 h-10 text-primary" />
                 </div>
-                
-                <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                  <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-accent/20 flex items-center justify-center">
-                    <Upload className="w-8 h-8 text-accent" />
-                  </div>
-                  <h3 className="text-2xl font-semibold mb-4">Multiple Medicines</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Upload multiple medicine photos at once for comprehensive batch analysis.
-                  </p>
-                  <Button 
-                    onClick={() => setCurrentState('multiple-upload')}
-                    className="btn-accent w-full"
-                  >
-                    Analyze Multiple Medicines
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {currentState === 'single-upload' && (
-          <div className="min-h-screen flex items-center justify-center px-4 py-12">
-            <div className="w-full max-w-4xl">
-              <div className="text-center mb-12 animate-fade-in">
-                <h1 className="text-4xl font-bold text-foreground mb-4">
-                  Upload Single Medicine Photo
-                </h1>
-                <p className="text-xl text-muted-foreground">
-                  Take or upload a clear photo of your medicine for instant identification
+                <h3 className="text-3xl font-semibold mb-4">Upload Medicine Photos</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Upload single or multiple medicine photos at once for comprehensive analysis.
                 </p>
+                <Button 
+                  onClick={() => setCurrentState('upload')}
+                  className="btn-medical text-lg px-8 py-4"
+                >
+                  Start Analysis
+                </Button>
               </div>
-              
-              <MedicineUpload 
-                onImageUpload={handleSingleImageUpload} 
-                isLoading={isAnalyzing}
-              />
             </div>
           </div>
         )}
 
-        {currentState === 'multiple-upload' && (
+        {currentState === 'upload' && (
           <div className="min-h-screen flex items-center justify-center px-4 py-12">
             <div className="w-full max-w-4xl">
               <div className="text-center mb-12 animate-fade-in">
                 <h1 className="text-4xl font-bold text-foreground mb-4">
-                  Upload Multiple Medicine Photos
+                  Upload Medicine Photos
                 </h1>
                 <p className="text-xl text-muted-foreground">
-                  Upload multiple medicine photos for comprehensive analysis
+                  Upload one or multiple photos of your medicines for AI analysis
                 </p>
               </div>
               
               <EnhancedMedicineUpload 
-                onImageUpload={handleMultipleImageUpload} 
+                onImageUpload={handleImageUpload} 
                 isLoading={isAnalyzing}
               />
             </div>
           </div>
         )}
 
-        {currentState === 'single-results' && (
+        {currentState === 'results' && (
           <div className="min-h-screen px-4 py-12">
             <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-4xl font-bold text-foreground mb-4">
                 Medicine Analysis Results
               </h1>
               <p className="text-xl text-muted-foreground">
-                Detailed information about your medicine
-              </p>
-            </div>
-            
-            <MedicineResults 
-              medicineInfo={medicineInfo}
-              isLoading={isAnalyzing}
-              uploadedImage={uploadedImageUrl}
-            />
-          </div>
-        )}
-
-        {currentState === 'multiple-results' && (
-          <div className="min-h-screen px-4 py-12">
-            <div className="text-center mb-12 animate-fade-in">
-              <h1 className="text-4xl font-bold text-foreground mb-4">
-                Multiple Medicine Analysis Results
-              </h1>
-              <p className="text-xl text-muted-foreground">
-                Detailed information about your medicines
+                Detailed information about your medicine{analysisResults.length > 1 ? 's' : ''}
               </p>
             </div>
 
@@ -323,9 +207,9 @@ const MedicineIdentifier = () => {
               <div className="text-center py-12">
                 <div className="animate-pulse-slow">
                   <Pill className="w-16 h-16 mx-auto mb-4 text-primary" />
-                  <h3 className="text-xl font-semibold">Analyzing Multiple Medicines...</h3>
+                  <h3 className="text-xl font-semibold">Analyzing Medicine{uploadedImages.length > 1 ? 's' : ''}...</h3>
                   <p className="text-muted-foreground mt-2">
-                    Processing {uploadedImages.length} medicine images...
+                    Processing {uploadedImages.length} medicine image{uploadedImages.length > 1 ? 's' : ''}...
                   </p>
                 </div>
               </div>
@@ -410,7 +294,7 @@ const MedicineIdentifier = () => {
                               </div>
                             )}
 
-                            {/* Important sections with limited display for space */}
+                            {/* Warnings */}
                             {result.result.warnings && result.result.warnings.length > 0 && (
                               <div>
                                 <h4 className="font-semibold text-destructive mb-2 flex items-center gap-2">

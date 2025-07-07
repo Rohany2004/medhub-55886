@@ -35,18 +35,18 @@ const Index = () => {
             </div>
 
             {/* Main Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
               <div className="glass-card p-8 rounded-xl text-center hover-lift">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Camera className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-3xl font-semibold mb-4">Medicine Identifier</h3>
+                <h3 className="text-2xl font-semibold mb-4">Medicine Identifier</h3>
                 <p className="text-muted-foreground mb-6 text-lg">
                   Identify medicines instantly by uploading photos. Get detailed information about 
-                  composition, uses, dosage, and safety warnings for single or multiple medicines.
+                  composition, uses, dosage, and safety warnings.
                 </p>
                 <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical w-full text-lg py-4">
-                  Identify Your Medicine
+                  Identify Medicine
                 </Button>
               </div>
               
@@ -54,13 +54,13 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <FileText className="w-10 h-10 text-accent" />
                 </div>
-                <h3 className="text-3xl font-semibold mb-4">MedExplain</h3>
+                <h3 className="text-2xl font-semibold mb-4">MedExplain</h3>
                 <p className="text-muted-foreground mb-6 text-lg">
                   Transform complex medical reports into simple, understandable insights. 
-                  Get explanations of medical terms, diagnosis, and recommended next steps.
+                  Get explanations of medical terms and diagnosis.
                 </p>
                 <Button onClick={() => window.location.href = '/medexplain'} className="btn-accent w-full text-lg py-4">
-                  Analyze Medical Reports
+                  Analyze Reports
                 </Button>
               </div>
 
@@ -68,13 +68,27 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Edit className="w-10 h-10 text-secondary" />
                 </div>
-                <h3 className="text-3xl font-semibold mb-4">Medicine Entry</h3>
+                <h3 className="text-2xl font-semibold mb-4">Medicine Entry</h3>
                 <p className="text-muted-foreground mb-6 text-lg">
                   Manually add medicine details with photo upload. Use AI to auto-fill information 
-                  or enter everything yourself for complete medicine tracking.
+                  or enter everything yourself.
                 </p>
                 <Button onClick={() => window.location.href = '/manual-medicine-entry'} className="btn-secondary w-full text-lg py-4">
-                  Add Medicine Manually
+                  Add Medicine
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <Pill className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">My Medicines</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  View and manage your saved medicine collection. Search, edit, and organize 
+                  all your medicine entries in one place.
+                </p>
+                <Button onClick={() => window.location.href = '/my-medicines'} className="btn-medical w-full text-lg py-4">
+                  View Collection
                 </Button>
               </div>
             </div>
