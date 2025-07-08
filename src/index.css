@@ -209,6 +209,18 @@
     transform: translateY(-1px);
     box-shadow: var(--shadow-medical);
   }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-sm font-semibold transition-all duration-300;
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    border: 1px solid hsl(var(--border));
+  }
+
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    background: hsl(var(--secondary) / 0.8);
+  }
 }
 
 @keyframes fadeIn {

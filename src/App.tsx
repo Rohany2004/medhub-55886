@@ -12,6 +12,9 @@ import MedExplain from "./pages/MedExplain";
 import MedicineIdentifier from "./pages/MedicineIdentifier";
 import ManualMedicineEntry from "./pages/ManualMedicineEntry";
 import MyMedicines from "./pages/MyMedicines";
+import Dashboard from "./pages/Dashboard";
+import BarcodeScannerPage from "./pages/BarcodeScannerPage";
+import InteractionCheckerPage from "./pages/InteractionCheckerPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +31,9 @@ const App = () => (
             <Route path="/medicine-identifier" element={<MedicineIdentifier />} />
             <Route path="/manual-medicine-entry" element={<ManualMedicineEntry />} />
             <Route path="/my-medicines" element={<MyMedicines />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/barcode-scanner" element={<BarcodeScannerPage />} />
+            <Route path="/interaction-checker" element={<InteractionCheckerPage />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

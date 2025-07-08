@@ -2,7 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 import FloatingMedicalIcons from '@/components/FloatingMedicalIcons';
-import { FileText, Camera, Pill, Shield, Zap, Users, Edit } from 'lucide-react';
+import { FileText, Camera, Pill, Shield, Zap, Users, Edit, Activity, Heart } from 'lucide-react';
+import { ScanLine } from 'lucide-react';
 const Index = () => {
   const handleHome = () => {
     // Already on home page
@@ -91,6 +92,51 @@ const Index = () => {
                 </p>
                 <Button onClick={() => window.location.href = '/my-medicines'} className="btn-medical w-full text-lg py-4">
                   View Collection
+                </Button>
+              </div>
+            </div>
+
+            {/* New Features Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Activity className="w-10 h-10 text-accent" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Health Dashboard</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Track your medicine usage, expiry dates, and get health insights 
+                  all in one personalized dashboard.
+                </p>
+                <Button onClick={() => window.location.href = '/dashboard'} className="btn-accent w-full text-lg py-4">
+                  View Dashboard
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <ScanLine className="w-10 h-10 text-secondary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Barcode Scanner</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Quickly identify medicines by scanning their barcodes with your 
+                  device camera for instant results.
+                </p>
+                <Button onClick={() => window.location.href = '/barcode-scanner'} className="btn-secondary w-full text-lg py-4">
+                  Scan Barcode
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Heart className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Interaction Checker</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Check for potential dangerous interactions between multiple 
+                  medicines to ensure your safety.
+                </p>
+                <Button onClick={() => window.location.href = '/interaction-checker'} className="btn-medical w-full text-lg py-4">
+                  Check Interactions
                 </Button>
               </div>
             </div>

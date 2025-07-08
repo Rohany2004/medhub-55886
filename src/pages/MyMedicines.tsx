@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Pill, Search, Edit, Trash2, Calendar, Package, User, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pill, Search, Edit, Trash2, Calendar, Package, User, AlertCircle, Filter, SortAsc, SortDesc } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 
@@ -19,6 +20,9 @@ const MyMedicines = () => {
   const [medicines, setMedicines] = useState<MedicineEntry[]>([]);
   const [filteredMedicines, setFilteredMedicines] = useState<MedicineEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
@@ -88,13 +92,51 @@ const MyMedicines = () => {
   }, [user]);
 
   useEffect(() => {
-    const filtered = medicines.filter(medicine =>
-      medicine.medicine_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      medicine.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      medicine.use_case?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filtered = medicines.filter(medicine => {
+      const matchesSearch = medicine.medicine_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        medicine.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        medicine.use_case?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesCategory = selectedCategory === 'All' || medicine.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.medicine_name.toLowerCase();
+          bValue = b.medicine_name.toLowerCase();
+          break;
+        case 'expiry_date':
+          aValue = a.expiry_date ? new Date(a.expiry_date).getTime() : 0;
+          bValue = b.expiry_date ? new Date(b.expiry_date).getTime() : 0;
+          break;
+        case 'category':
+          aValue = a.category || 'Other';
+          bValue = b.category || 'Other';
+          break;
+        case 'price':
+          aValue = a.price || 0;
+          bValue = b.price || 0;
+          break;
+        default:
+          aValue = new Date(a.created_at).getTime();
+          bValue = new Date(b.created_at).getTime();
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+
     setFilteredMedicines(filtered);
-  }, [searchTerm, medicines]);
+  }, [searchTerm, selectedCategory, sortBy, sortOrder, medicines]);
 
   if (isLoading) {
     return (
@@ -141,15 +183,62 @@ const MyMedicines = () => {
               Manage your saved medicine collection
             </p>
 
-            {/* Search */}
-            <div className="max-w-md mx-auto relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-              <Input
-                placeholder="Search medicines..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            {/* Search and Filters */}
+            <div className="max-w-4xl mx-auto space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search medicines..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              
+              <div className="flex flex-wrap gap-4 items-center justify-center">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Categories</SelectItem>
+                      <SelectItem value="Pain Relief">Pain Relief</SelectItem>
+                      <SelectItem value="Antibiotics">Antibiotics</SelectItem>
+                      <SelectItem value="Vitamins & Supplements">Vitamins & Supplements</SelectItem>
+                      <SelectItem value="Cardiovascular">Cardiovascular</SelectItem>
+                      <SelectItem value="Diabetes">Diabetes</SelectItem>
+                      <SelectItem value="Allergy & Respiratory">Allergy & Respiratory</SelectItem>
+                      <SelectItem value="Digestive Health">Digestive Health</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="created_at">Date Added</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="category">Category</SelectItem>
+                      <SelectItem value="expiry_date">Expiry Date</SelectItem>
+                      <SelectItem value="price">Price</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                  >
+                    {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -173,7 +262,12 @@ const MyMedicines = () => {
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <CardTitle className="text-lg mb-1">{medicine.medicine_name}</CardTitle>
+                    <CardTitle className="text-lg mb-1">{medicine.medicine_name}</CardTitle>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {medicine.category || 'Other'}
+                          </Badge>
+                        </div>
                         {medicine.manufacturer && (
                           <div className="flex items-center gap-1 text-sm text-muted-foreground">
                             <Package className="w-4 h-4" />

@@ -17,6 +17,7 @@ export type Database = {
       medicine_entries: {
         Row: {
           additional_notes: string | null
+          category: string | null
           created_at: string
           daily_dosage: string | null
           expiry_date: string | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           additional_notes?: string | null
+          category?: string | null
           created_at?: string
           daily_dosage?: string | null
           expiry_date?: string | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           additional_notes?: string | null
+          category?: string | null
           created_at?: string
           daily_dosage?: string | null
           expiry_date?: string | null
