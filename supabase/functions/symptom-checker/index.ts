@@ -35,7 +35,7 @@ Please provide a JSON response with the following structure:
 
 Important: This is for informational purposes only and should not replace professional medical advice. Base urgency on symptom severity - use "high" for severe or emergency symptoms, "medium" for concerning symptoms that need medical attention soon, and "low" for mild symptoms that can be monitored.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
