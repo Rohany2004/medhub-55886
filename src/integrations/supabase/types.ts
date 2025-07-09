@@ -14,6 +14,56 @@ export type Database = {
   }
   public: {
     Tables: {
+      answers: {
+        Row: {
+          confidence_score: number | null
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          is_accepted: boolean | null
+          is_ai_generated: boolean | null
+          question_id: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          content: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          is_ai_generated?: boolean | null
+          question_id: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          content?: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          is_ai_generated?: boolean | null
+          question_id?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       family_groups: {
         Row: {
           created_at: string
@@ -312,6 +362,249 @@ export type Database = {
         }
         Relationships: []
       }
+      medicine_prices: {
+        Row: {
+          availability_status: string | null
+          created_at: string
+          currency: string | null
+          id: string
+          indian_medicine_id: string
+          last_updated: string
+          pack_size: string | null
+          pharmacy_id: string
+          price: number
+        }
+        Insert: {
+          availability_status?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          indian_medicine_id: string
+          last_updated?: string
+          pack_size?: string | null
+          pharmacy_id: string
+          price: number
+        }
+        Update: {
+          availability_status?: string | null
+          created_at?: string
+          currency?: string | null
+          id?: string
+          indian_medicine_id?: string
+          last_updated?: string
+          pack_size?: string | null
+          pharmacy_id?: string
+          price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_prices_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medicine_prices_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_reviews: {
+        Row: {
+          created_at: string
+          ease_of_use_rating: number | null
+          effectiveness_rating: number | null
+          helpful_votes: number | null
+          id: string
+          medicine_entry_id: string | null
+          medicine_id: string | null
+          rating: number
+          review_text: string | null
+          side_effects: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ease_of_use_rating?: number | null
+          effectiveness_rating?: number | null
+          helpful_votes?: number | null
+          id?: string
+          medicine_entry_id?: string | null
+          medicine_id?: string | null
+          rating: number
+          review_text?: string | null
+          side_effects?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ease_of_use_rating?: number | null
+          effectiveness_rating?: number | null
+          helpful_votes?: number | null
+          id?: string
+          medicine_entry_id?: string | null
+          medicine_id?: string | null
+          rating?: number
+          review_text?: string | null
+          side_effects?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_reviews_medicine_entry_id_fkey"
+            columns: ["medicine_entry_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medicine_reviews_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pharmacies: {
+        Row: {
+          address: string | null
+          created_at: string
+          email: string | null
+          id: string
+          location: string | null
+          name: string
+          phone: string | null
+          updated_at: string
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      prescription_medicines: {
+        Row: {
+          created_at: string
+          dosage: string | null
+          duration: string | null
+          frequency: string | null
+          id: string
+          indian_medicine_id: string | null
+          instructions: string | null
+          medicine_name: string
+          prescription_id: string
+        }
+        Insert: {
+          created_at?: string
+          dosage?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          indian_medicine_id?: string | null
+          instructions?: string | null
+          medicine_name: string
+          prescription_id: string
+        }
+        Update: {
+          created_at?: string
+          dosage?: string | null
+          duration?: string | null
+          frequency?: string | null
+          id?: string
+          indian_medicine_id?: string | null
+          instructions?: string | null
+          medicine_name?: string
+          prescription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_medicines_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_medicines_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          created_at: string
+          diagnosis: string | null
+          doctor_name: string | null
+          id: string
+          image_url: string
+          ocr_text: string | null
+          patient_name: string | null
+          prescription_date: string | null
+          status: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          image_url: string
+          ocr_text?: string | null
+          patient_name?: string | null
+          prescription_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          image_url?: string
+          ocr_text?: string | null
+          patient_name?: string | null
+          prescription_date?: string | null
+          status?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -333,6 +626,51 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          is_answered: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_answered?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_answered?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string
+          view_count?: number | null
         }
         Relationships: []
       }
@@ -440,6 +778,75 @@ export type Database = {
           },
         ]
       }
+      symptom_medicine_mapping: {
+        Row: {
+          confidence_level: string | null
+          created_at: string
+          effectiveness_score: number | null
+          id: string
+          indian_medicine_id: string
+          symptom_id: string
+        }
+        Insert: {
+          confidence_level?: string | null
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          indian_medicine_id: string
+          symptom_id: string
+        }
+        Update: {
+          confidence_level?: string | null
+          created_at?: string
+          effectiveness_score?: number | null
+          id?: string
+          indian_medicine_id?: string
+          symptom_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "symptom_medicine_mapping_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "symptom_medicine_mapping_symptom_id_fkey"
+            columns: ["symptom_id"]
+            isOneToOne: false
+            referencedRelation: "symptoms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      symptoms: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          severity_level: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          severity_level?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          severity_level?: string | null
+        }
+        Relationships: []
+      }
       usage_logs: {
         Row: {
           action_type: string
@@ -477,6 +884,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_type: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_type: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_type?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

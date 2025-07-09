@@ -15,6 +15,9 @@ import MyMedicines from "./pages/MyMedicines";
 import Dashboard from "./pages/Dashboard";
 import BarcodeScannerPage from "./pages/BarcodeScannerPage";
 import InteractionCheckerPage from "./pages/InteractionCheckerPage";
+import SymptomChecker from "./pages/SymptomChecker";
+import PrescriptionReader from "./pages/PrescriptionReader";
+import CommunityQA from "./pages/CommunityQA";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +37,9 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/barcode-scanner" element={<BarcodeScannerPage />} />
             <Route path="/interaction-checker" element={<InteractionCheckerPage />} />
+            <Route path="/symptom-checker" element={<SymptomChecker />} />
+            <Route path="/prescription-reader" element={<PrescriptionReader />} />
+            <Route path="/community-qa" element={<CommunityQA />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

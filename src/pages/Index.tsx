@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
 import FloatingMedicalIcons from '@/components/FloatingMedicalIcons';
-import { FileText, Camera, Pill, Shield, Zap, Users, Edit, Activity, Heart } from 'lucide-react';
+import { FileText, Camera, Pill, Shield, Zap, Users, Edit, Activity, Heart, Search, Stethoscope, MessageSquare } from 'lucide-react';
 import { ScanLine } from 'lucide-react';
 const Index = () => {
   const handleHome = () => {
@@ -96,7 +96,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* New Features Section */}
+            {/* Advanced Features Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
               <div className="glass-card p-8 rounded-xl text-center hover-lift">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
@@ -137,6 +137,51 @@ const Index = () => {
                 </p>
                 <Button onClick={() => window.location.href = '/interaction-checker'} className="btn-medical w-full text-lg py-4">
                   Check Interactions
+                </Button>
+              </div>
+            </div>
+
+            {/* Community & AI Features Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+                  <Search className="w-10 h-10 text-green-600" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Symptom Checker</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Describe your symptoms and get AI-powered health insights and 
+                  possible condition suggestions.
+                </p>
+                <Button onClick={() => window.location.href = '/symptom-checker'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(34, 197, 94)', color: 'white'}}>
+                  Check Symptoms
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Stethoscope className="w-10 h-10 text-blue-600" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Prescription Reader</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Upload prescription images to extract medicine information 
+                  using advanced OCR technology.
+                </p>
+                <Button onClick={() => window.location.href = '/prescription-reader'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(59, 130, 246)', color: 'white'}}>
+                  Read Prescription
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-100 flex items-center justify-center">
+                  <MessageSquare className="w-10 h-10 text-purple-600" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Community Q&A</h3>
+                <p className="text-muted-foreground mb-6 text-lg">
+                  Ask health questions and get answers from the community 
+                  and AI-powered assistance.
+                </p>
+                <Button onClick={() => window.location.href = '/community-qa'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(147, 51, 234)', color: 'white'}}>
+                  Join Community
                 </Button>
               </div>
             </div>
