@@ -28,7 +28,18 @@ serve(async (req) => {
     // Download image from storage
     const imageResponse = await fetch(imageUrl);
     const imageBuffer = await imageResponse.arrayBuffer();
-    const imageBase64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+    
+    // Convert to base64 without causing stack overflow
+    const uint8Array = new Uint8Array(imageBuffer);
+    const chunks = [];
+    const chunkSize = 8192; // Process in chunks to avoid stack overflow
+    
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.slice(i, i + chunkSize);
+      chunks.push(String.fromCharCode(...chunk));
+    }
+    
+    const imageBase64 = btoa(chunks.join(''));
 
     const prompt = `You are a medical prescription OCR system. Analyze this prescription image and extract the following information in a structured JSON format:
 
