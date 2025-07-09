@@ -37,14 +37,14 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Main Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+            {/* Main Features - Perfect 3x3 Symmetrical Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Camera className="w-10 h-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Medicine Identifier</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Identify medicines instantly by uploading photos. Get detailed information about 
                   composition, uses, dosage, and safety warnings.
                 </p>
@@ -53,12 +53,12 @@ const Index = () => {
                 </Button>
               </div>
               
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <FileText className="w-10 h-10 text-accent" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">MedExplain</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Transform complex medical reports into simple, understandable insights. 
                   Get explanations of medical terms and diagnosis.
                 </p>
@@ -67,12 +67,12 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Edit className="w-10 h-10 text-secondary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Medicine Entry</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Manually add medicine details with photo upload. Use AI to auto-fill information 
                   or enter everything yourself.
                 </p>
@@ -81,12 +81,12 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/20 flex items-center justify-center">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Pill className="w-10 h-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">My Medicines</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   View and manage your saved medicine collection. Search, edit, and organize 
                   all your medicine entries in one place.
                 </p>
@@ -94,16 +94,13 @@ const Index = () => {
                   View Collection
                 </Button>
               </div>
-            </div>
 
-            {/* Advanced Features Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <Activity className="w-10 h-10 text-accent" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Health Dashboard</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Track your medicine usage, expiry dates, and get health insights 
                   all in one personalized dashboard.
                 </p>
@@ -112,12 +109,12 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <ScanLine className="w-10 h-10 text-secondary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Barcode Scanner</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Quickly identify medicines by scanning their barcodes with your 
                   device camera for instant results.
                 </p>
@@ -126,12 +123,12 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Heart className="w-10 h-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Interaction Checker</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Check for potential dangerous interactions between multiple 
                   medicines to ensure your safety.
                 </p>
@@ -139,87 +136,141 @@ const Index = () => {
                   Check Interactions
                 </Button>
               </div>
-            </div>
 
-            {/* Community & AI Features Section */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <Search className="w-10 h-10 text-green-600" />
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Search className="w-10 h-10 text-accent" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Symptom Checker</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Describe your symptoms and get AI-powered health insights and 
                   possible condition suggestions.
                 </p>
-                <Button onClick={() => window.location.href = '/symptom-checker'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(34, 197, 94)', color: 'white'}}>
+                <Button onClick={() => window.location.href = '/symptom-checker'} className="btn-accent w-full text-lg py-4">
                   Check Symptoms
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Stethoscope className="w-10 h-10 text-blue-600" />
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <Stethoscope className="w-10 h-10 text-secondary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Prescription Reader</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
                   Upload prescription images to extract medicine information 
                   using advanced OCR technology.
                 </p>
-                <Button onClick={() => window.location.href = '/prescription-reader'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(59, 130, 246)', color: 'white'}}>
+                <Button onClick={() => window.location.href = '/prescription-reader'} className="btn-secondary w-full text-lg py-4">
                   Read Prescription
-                </Button>
-              </div>
-
-              <div className="glass-card p-8 rounded-xl text-center hover-lift">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-purple-100 flex items-center justify-center">
-                  <MessageSquare className="w-10 h-10 text-purple-600" />
-                </div>
-                <h3 className="text-2xl font-semibold mb-4">Community Q&A</h3>
-                <p className="text-muted-foreground mb-6 text-lg">
-                  Ask health questions and get answers from the community 
-                  and AI-powered assistance.
-                </p>
-                <Button onClick={() => window.location.href = '/community-qa'} className="w-full text-lg py-4" style={{backgroundColor: 'rgb(147, 51, 234)', color: 'white'}}>
-                  Join Community
                 </Button>
               </div>
             </div>
 
-            {/* Why Choose Us Section */}
-            <div className="mb-16">
+            {/* Complete the 3x3 Grid with Community Feature */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <MessageSquare className="w-10 h-10 text-primary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Community Q&A</h3>
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
+                  Ask health questions and get answers from the community 
+                  and AI-powered assistance.
+                </p>
+                <Button onClick={() => window.location.href = '/community-qa'} className="btn-medical w-full text-lg py-4">
+                  Join Community
+                </Button>
+              </div>
+              
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
+                  <Pill className="w-10 h-10 text-accent" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Multiple Medicines</h3>
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
+                  Upload multiple medicine images at once and get comprehensive 
+                  analysis for all your medications.
+                </p>
+                <Button onClick={() => window.location.href = '/multiple-medicines'} className="btn-accent w-full text-lg py-4">
+                  Analyze Multiple
+                </Button>
+              </div>
+
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+                  <Activity className="w-10 h-10 text-secondary" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-4">Health Analytics</h3>
+                <p className="text-muted-foreground mb-6 text-lg flex-grow">
+                  Get detailed insights about your health patterns, medicine usage, 
+                  and personalized recommendations.
+                </p>
+                <Button onClick={() => window.location.href = '/dashboard'} className="btn-secondary w-full text-lg py-4">
+                  View Analytics
+                </Button>
+              </div>
+            </div>
+
+            {/* Why Choose Us Section - Perfect Symmetry */}
+            <div className="mb-20">
               <h2 className="text-4xl font-bold text-center mb-12">
                 Why Choose Our Platform?
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="glass-card p-6 rounded-xl text-center hover-lift">
-                  <Zap className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <h4 className="text-xl font-semibold mb-2">Lightning Fast</h4>
-                  <p className="text-muted-foreground">
-                    Get instant results with our advanced AI processing technology.
+                <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Zap className="w-10 h-10 text-primary" />
+                  </div>
+                  <h4 className="text-2xl font-semibold mb-4">Lightning Fast</h4>
+                  <p className="text-muted-foreground text-lg flex-grow">
+                    Get instant results with our advanced AI processing technology 
+                    for immediate healthcare insights.
                   </p>
                 </div>
                 
-                <div className="glass-card p-6 rounded-xl text-center hover-lift">
-                  <Shield className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <h4 className="text-xl font-semibold mb-2">Secure & Private</h4>
-                  <p className="text-muted-foreground">
-                    Your medical data is processed securely with enterprise-grade encryption.
+                <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
+                    <Shield className="w-10 h-10 text-accent" />
+                  </div>
+                  <h4 className="text-2xl font-semibold mb-4">Secure & Private</h4>
+                  <p className="text-muted-foreground text-lg flex-grow">
+                    Your medical data is processed securely with enterprise-grade 
+                    encryption and privacy protection.
                   </p>
                 </div>
                 
-                <div className="glass-card p-6 rounded-xl text-center hover-lift">
-                  <Users className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <h4 className="text-xl font-semibold mb-2">User-Friendly</h4>
-                  <p className="text-muted-foreground">
-                    Simple interface designed for everyone, with clear explanations.
+                <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                  <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+                    <Users className="w-10 h-10 text-secondary" />
+                  </div>
+                  <h4 className="text-2xl font-semibold mb-4">User-Friendly</h4>
+                  <p className="text-muted-foreground text-lg flex-grow">
+                    Simple interface designed for everyone, with clear explanations 
+                    and intuitive navigation.
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Call to Action */}
+            {/* Call to Action - Perfectly Centered */}
+            <div className="text-center">
+              <div className="glass-card p-12 rounded-xl mx-auto max-w-2xl">
+                <h3 className="text-3xl font-bold mb-6">Ready to Get Started?</h3>
+                <p className="text-xl text-muted-foreground mb-8">
+                  Join thousands of users who trust our AI-powered medical assistant 
+                  for their healthcare needs.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg py-4 px-8">
+                    Start Identifying Medicine
+                  </Button>
+                  <Button onClick={() => window.location.href = '/auth'} className="btn-secondary text-lg py-4 px-8">
+                    Create Account
+                  </Button>
+                </div>
+              </div>
+            </div>
             
           </div>
         </div>
