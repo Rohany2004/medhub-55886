@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.ai-qa-assistant]
 verify_jwt = false
+
+[functions.ocr-prescription]
+verify_jwt = false
