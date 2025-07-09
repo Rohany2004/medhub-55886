@@ -9,3 +9,9 @@ verify_jwt = false
 
 [functions.analyze-multiple-medicines]
 verify_jwt = false
+
+[functions.symptom-checker]
+verify_jwt = false
+
+[functions.ai-qa-assistant]
+verify_jwt = false
