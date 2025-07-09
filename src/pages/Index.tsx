@@ -255,21 +255,7 @@ const Index = () => {
 
             {/* Call to Action - Perfectly Centered */}
             <div className="text-center">
-              <div className="glass-card p-12 rounded-xl mx-auto max-w-2xl">
-                <h3 className="text-3xl font-bold mb-6">Ready to Get Started?</h3>
-                <p className="text-xl text-muted-foreground mb-8">
-                  Join thousands of users who trust our AI-powered medical assistant 
-                  for their healthcare needs.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg py-4 px-8">
-                    Start Identifying Medicine
-                  </Button>
-                  <Button onClick={() => window.location.href = '/auth'} className="btn-secondary text-lg py-4 px-8">
-                    Create Account
-                  </Button>
-                </div>
-              </div>
+              
             </div>
             
           </div>
