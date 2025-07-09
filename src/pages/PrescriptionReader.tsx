@@ -46,7 +46,7 @@ const PrescriptionReader = () => {
     setLoading(true);
     try {
       // Upload image to Supabase storage
-      const fileName = `prescription-${Date.now()}.${selectedFile.name.split('.').pop()}`;
+      const fileName = `${user.id}/prescription-${Date.now()}.${selectedFile.name.split('.').pop()}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('medicine-photos')
         .upload(fileName, selectedFile);
