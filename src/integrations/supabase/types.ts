@@ -14,6 +14,68 @@ export type Database = {
   }
   public: {
     Tables: {
+      family_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          invite_code: string
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          invite_code?: string
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          invite_code?: string
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      family_members: {
+        Row: {
+          family_group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          family_group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          family_group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_family_group_id_fkey"
+            columns: ["family_group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medicine_entries: {
         Row: {
           additional_notes: string | null
@@ -86,12 +148,163 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          created_at: string
+          custom_schedule: Json | null
+          days_of_week: number[] | null
+          frequency: string | null
+          id: string
+          is_active: boolean
+          last_triggered_at: string | null
+          medicine_id: string | null
+          message: string | null
+          next_trigger_at: string | null
+          reminder_time: string | null
+          reminder_type: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          custom_schedule?: Json | null
+          days_of_week?: number[] | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          medicine_id?: string | null
+          message?: string | null
+          next_trigger_at?: string | null
+          reminder_time?: string | null
+          reminder_type: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          custom_schedule?: Json | null
+          days_of_week?: number[] | null
+          frequency?: string | null
+          id?: string
+          is_active?: boolean
+          last_triggered_at?: string | null
+          medicine_id?: string | null
+          message?: string | null
+          next_trigger_at?: string | null
+          reminder_time?: string | null
+          reminder_type?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_medicines: {
+        Row: {
+          can_edit: boolean
+          family_group_id: string
+          id: string
+          medicine_id: string
+          shared_at: string
+          shared_by: string
+        }
+        Insert: {
+          can_edit?: boolean
+          family_group_id: string
+          id?: string
+          medicine_id: string
+          shared_at?: string
+          shared_by: string
+        }
+        Update: {
+          can_edit?: boolean
+          family_group_id?: string
+          id?: string
+          medicine_id?: string
+          shared_at?: string
+          shared_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_medicines_family_group_id_fkey"
+            columns: ["family_group_id"]
+            isOneToOne: false
+            referencedRelation: "family_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_medicines_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_logs: {
+        Row: {
+          action_type: string
+          id: string
+          logged_at: string
+          medicine_id: string | null
+          notes: string | null
+          quantity_taken: number | null
+          user_id: string
+        }
+        Insert: {
+          action_type: string
+          id?: string
+          logged_at?: string
+          medicine_id?: string | null
+          notes?: string | null
+          quantity_taken?: number | null
+          user_id: string
+        }
+        Update: {
+          action_type?: string
+          id?: string
+          logged_at?: string
+          medicine_id?: string | null
+          notes?: string | null
+          quantity_taken?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_logs_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_next_reminder_time: {
+        Args: {
+          reminder_id: string
+          frequency: string
+          reminder_time: string
+          days_of_week: number[]
+          custom_schedule: Json
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
