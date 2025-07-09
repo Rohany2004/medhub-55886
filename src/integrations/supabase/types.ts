@@ -76,6 +76,194 @@ export type Database = {
           },
         ]
       }
+      indian_medicines: {
+        Row: {
+          composition: string | null
+          contraindications: string[] | null
+          created_at: string
+          generic_name: string | null
+          id: string
+          manufacturer: string | null
+          name: string
+          pregnancy_category: string | null
+          schedule: string | null
+          side_effects: string[] | null
+          storage_conditions: string | null
+          therapeutic_class: string | null
+          typical_uses: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          composition?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          name: string
+          pregnancy_category?: string | null
+          schedule?: string | null
+          side_effects?: string[] | null
+          storage_conditions?: string | null
+          therapeutic_class?: string | null
+          typical_uses?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          composition?: string | null
+          contraindications?: string[] | null
+          created_at?: string
+          generic_name?: string | null
+          id?: string
+          manufacturer?: string | null
+          name?: string
+          pregnancy_category?: string | null
+          schedule?: string | null
+          side_effects?: string[] | null
+          storage_conditions?: string | null
+          therapeutic_class?: string | null
+          typical_uses?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      medicine_barcodes: {
+        Row: {
+          barcode: string
+          barcode_type: string | null
+          created_at: string
+          id: string
+          indian_medicine_id: string
+        }
+        Insert: {
+          barcode: string
+          barcode_type?: string | null
+          created_at?: string
+          id?: string
+          indian_medicine_id: string
+        }
+        Update: {
+          barcode?: string
+          barcode_type?: string | null
+          created_at?: string
+          id?: string
+          indian_medicine_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_barcodes_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_brands: {
+        Row: {
+          brand_name: string
+          created_at: string
+          id: string
+          indian_medicine_id: string
+          manufacturer: string | null
+          mrp: number | null
+          pack_size: string | null
+        }
+        Insert: {
+          brand_name: string
+          created_at?: string
+          id?: string
+          indian_medicine_id: string
+          manufacturer?: string | null
+          mrp?: number | null
+          pack_size?: string | null
+        }
+        Update: {
+          brand_name?: string
+          created_at?: string
+          id?: string
+          indian_medicine_id?: string
+          manufacturer?: string | null
+          mrp?: number | null
+          pack_size?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_brands_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          parent_category_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          parent_category_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          parent_category_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "medicine_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicine_compositions: {
+        Row: {
+          active_ingredient: string
+          created_at: string
+          id: string
+          indian_medicine_id: string
+          strength: string | null
+          unit: string | null
+        }
+        Insert: {
+          active_ingredient: string
+          created_at?: string
+          id?: string
+          indian_medicine_id: string
+          strength?: string | null
+          unit?: string | null
+        }
+        Update: {
+          active_ingredient?: string
+          created_at?: string
+          id?: string
+          indian_medicine_id?: string
+          strength?: string | null
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medicine_compositions_indian_medicine_id_fkey"
+            columns: ["indian_medicine_id"]
+            isOneToOne: false
+            referencedRelation: "indian_medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       medicine_entries: {
         Row: {
           additional_notes: string | null
