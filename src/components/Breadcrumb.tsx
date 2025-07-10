@@ -27,7 +27,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className = '' }) => {
       </Button>
       
       {items.map((item, index) => (
-        <React.Fragment key={index}>
+        <div key={index} className="flex items-center space-x-1">
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
           {item.active ? (
             <span className="px-2 py-1 text-foreground font-medium">
@@ -43,7 +43,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className = '' }) => {
               {item.label}
             </Button>
           )}
-        </React.Fragment>
+        </div>
       ))}
     </nav>
   );

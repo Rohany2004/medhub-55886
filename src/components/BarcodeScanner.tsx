@@ -22,13 +22,19 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
   const startScanning = async () => {
     try {
       setError(null);
+      setIsScanning(true);
       
+      // Check if browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera access not supported by this browser');
+      }
+
       // Initialize the code reader
       const reader = new BrowserMultiFormatReader();
       setCodeReader(reader);
       
-      // Start continuous scanning
-      const stream = await navigator.mediaDevices.getUserMedia({
+      // Request camera permission and start stream
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { 
           facingMode: 'environment',
           width: { ideal: 1280 },
@@ -36,32 +42,51 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
         }
       });
       
-      setStream(stream);
+      setStream(mediaStream);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-        setIsScanning(true);
+        videoRef.current.srcObject = mediaStream;
         
-        // Start decoding from video stream
-        reader.decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
-          if (result) {
-            const barcode = result.getText();
-            onScanResult(barcode);
-            toast({
-              title: "Barcode Detected",
-              description: `Scanned: ${barcode}`,
-            });
-            stopScanning();
-          }
-        });
+        // Wait for video to be ready
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play();
+          
+          // Start decoding from video stream
+          reader.decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
+            if (result) {
+              const barcode = result.getText();
+              onScanResult(barcode);
+              toast({
+                title: "Barcode Detected",
+                description: `Scanned: ${barcode}`,
+              });
+              stopScanning();
+            }
+            if (error && !(error.name === 'NotFoundException')) {
+              console.warn('Barcode scanning error:', error);
+            }
+          });
+        };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error accessing camera or scanning barcode:', err);
-      setError('Unable to access camera or scan barcode. Please check permissions.');
+      setIsScanning(false);
+      
+      let errorMessage = 'Unable to access camera. ';
+      if (err.name === 'NotAllowedError') {
+        errorMessage += 'Please allow camera access and try again.';
+      } else if (err.name === 'NotFoundError') {
+        errorMessage += 'No camera found on this device.';
+      } else if (err.name === 'NotSupportedError') {
+        errorMessage += 'Camera not supported by this browser.';
+      } else {
+        errorMessage += 'Please check camera permissions and try again.';
+      }
+      
+      setError(errorMessage);
       toast({
         title: "Scanner Error",
-        description: "Unable to access camera or scan barcode. Please check permissions.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
