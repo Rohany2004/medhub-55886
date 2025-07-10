@@ -1,8 +1,9 @@
 
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, X, Plus } from 'lucide-react';
+import { Upload, FileText, X, Plus, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import CameraCapture from './CameraCapture';
 
 interface ReportUploadProps {
   onReportUpload: (files: File[]) => void;
@@ -12,6 +13,7 @@ interface ReportUploadProps {
 const ReportUpload: React.FC<ReportUploadProps> = ({ onReportUpload, isLoading }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -78,6 +80,11 @@ const ReportUpload: React.FC<ReportUploadProps> = ({ onReportUpload, isLoading }
     fileInputRef.current?.click();
   };
 
+  const handleCameraCapture = (file: File) => {
+    setUploadedFiles(prev => [...prev, file]);
+    setShowCamera(false);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div
@@ -116,9 +123,22 @@ const ReportUpload: React.FC<ReportUploadProps> = ({ onReportUpload, isLoading }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-4">
-            <Button className="btn-medical flex items-center gap-2" disabled={isLoading}>
+            <Button 
+              className="btn-medical flex items-center gap-2" 
+              disabled={isLoading}
+              onClick={openFileDialog}
+            >
               <FileText className="w-5 h-5" />
               Choose Files
+            </Button>
+            
+            <Button 
+              className="btn-accent flex items-center gap-2" 
+              disabled={isLoading}
+              onClick={() => setShowCamera(true)}
+            >
+              <Camera className="w-5 h-5" />
+              Take Photo
             </Button>
             
             <p className="text-sm text-muted-foreground">
@@ -169,6 +189,12 @@ const ReportUpload: React.FC<ReportUploadProps> = ({ onReportUpload, isLoading }
           </div>
         </div>
       )}
+      
+      <CameraCapture
+        isOpen={showCamera}
+        onCapture={handleCameraCapture}
+        onClose={() => setShowCamera(false)}
+      />
     </div>
   );
 };

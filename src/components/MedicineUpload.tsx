@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import CameraCapture from './CameraCapture';
 
 interface MedicineUploadProps {
   onImageUpload: (file: File) => void;
@@ -11,6 +12,7 @@ interface MedicineUploadProps {
 const MedicineUpload: React.FC<MedicineUploadProps> = ({ onImageUpload, isLoading }) => {
   const [dragActive, setDragActive] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -62,6 +64,11 @@ const MedicineUpload: React.FC<MedicineUploadProps> = ({ onImageUpload, isLoadin
     fileInputRef.current?.click();
   };
 
+  const handleCameraCapture = (file: File) => {
+    handleFile(file);
+    setShowCamera(false);
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       {!preview ? (
@@ -100,9 +107,22 @@ const MedicineUpload: React.FC<MedicineUploadProps> = ({ onImageUpload, isLoadin
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button className="btn-medical flex items-center gap-2" disabled={isLoading}>
-                <Camera className="w-5 h-5" />
+              <Button 
+                className="btn-medical flex items-center gap-2" 
+                disabled={isLoading}
+                onClick={openFileDialog}
+              >
+                <Upload className="w-5 h-5" />
                 Choose Photo
+              </Button>
+              
+              <Button 
+                className="btn-accent flex items-center gap-2" 
+                disabled={isLoading}
+                onClick={() => setShowCamera(true)}
+              >
+                <Camera className="w-5 h-5" />
+                Take Photo
               </Button>
               
               <p className="text-sm text-muted-foreground">
@@ -142,6 +162,12 @@ const MedicineUpload: React.FC<MedicineUploadProps> = ({ onImageUpload, isLoadin
           </div>
         </div>
       )}
+      
+      <CameraCapture
+        isOpen={showCamera}
+        onCapture={handleCameraCapture}
+        onClose={() => setShowCamera(false)}
+      />
     </div>
   );
 };

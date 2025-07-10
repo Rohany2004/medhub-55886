@@ -17,6 +17,7 @@ import { Pill, Upload, Sparkles, CalendarIcon, Camera, DollarSign } from 'lucide
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import CameraCapture from '@/components/CameraCapture';
 
 const medicineSchema = z.object({
   medicine_name: z.string().min(1, 'Medicine name is required'),
@@ -33,6 +34,7 @@ type MedicineFormData = z.infer<typeof medicineSchema>;
 const ManualMedicineEntry = () => {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [showCamera, setShowCamera] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isGeneratingDetails, setIsGeneratingDetails] = useState(false);
   const { toast } = useToast();
@@ -69,6 +71,16 @@ const ManualMedicineEntry = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCameraCapture = (file: File) => {
+    setPhoto(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPhotoPreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    setShowCamera(false);
   };
 
   const generateDetailsWithAI = async () => {
@@ -233,11 +245,13 @@ const ManualMedicineEntry = () => {
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  {/* Photo Upload Section */}
-                  <div className="space-y-4">
+                    <div className="space-y-4">
                     <label className="block text-sm font-medium">Medicine Photo</label>
                     <div className="flex items-center justify-center w-full">
-                      <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer glass-card hover-lift">
+                      <label 
+                        htmlFor="photo-upload"
+                        className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer glass-card hover-lift"
+                      >
                         {photoPreview ? (
                           <img
                             src={photoPreview}
@@ -254,12 +268,25 @@ const ManualMedicineEntry = () => {
                           </div>
                         )}
                         <input
+                          id="photo-upload"
                           type="file"
                           className="hidden"
                           accept="image/*"
                           onChange={handlePhotoUpload}
                         />
                       </label>
+                    </div>
+                    
+                    <div className="flex justify-center">
+                      <Button
+                        type="button"
+                        onClick={() => setShowCamera(true)}
+                        variant="outline"
+                        className="flex items-center gap-2"
+                      >
+                        <Camera className="w-4 h-4" />
+                        Take Photo
+                      </Button>
                     </div>
                   </div>
 
@@ -430,11 +457,17 @@ const ManualMedicineEntry = () => {
                 </form>
               </Form>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
+          
+          <CameraCapture
+            isOpen={showCamera}
+            onCapture={handleCameraCapture}
+            onClose={() => setShowCamera(false)}
+          />
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default ManualMedicineEntry;

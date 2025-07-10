@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, Camera, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import CameraCapture from './CameraCapture';
 
 interface EnhancedMedicineUploadProps {
   onImageUpload: (files: File[]) => void;
@@ -12,6 +13,7 @@ interface EnhancedMedicineUploadProps {
 const EnhancedMedicineUpload: React.FC<EnhancedMedicineUploadProps> = ({ onImageUpload, isLoading }) => {
   const [dragActive, setDragActive] = useState(false);
   const [previews, setPreviews] = useState<{ file: File; url: string }[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -88,6 +90,18 @@ const EnhancedMedicineUpload: React.FC<EnhancedMedicineUploadProps> = ({ onImage
     fileInputRef.current?.click();
   };
 
+  const handleCameraCapture = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviews(prev => [...prev, { 
+        file, 
+        url: e.target?.result as string 
+      }]);
+    };
+    reader.readAsDataURL(file);
+    setShowCamera(false);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       {previews.length === 0 ? (
@@ -127,9 +141,22 @@ const EnhancedMedicineUpload: React.FC<EnhancedMedicineUploadProps> = ({ onImage
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button className="btn-medical flex items-center gap-2" disabled={isLoading}>
+              <Button 
+                className="btn-medical flex items-center gap-2" 
+                disabled={isLoading}
+                onClick={openFileDialog}
+              >
                 <Camera className="w-5 h-5" />
                 Choose Photos
+              </Button>
+              
+              <Button 
+                className="btn-accent flex items-center gap-2" 
+                disabled={isLoading}
+                onClick={() => setShowCamera(true)}
+              >
+                <Camera className="w-5 h-5" />
+                Take Photo
               </Button>
               
               <p className="text-sm text-muted-foreground">
@@ -207,6 +234,12 @@ const EnhancedMedicineUpload: React.FC<EnhancedMedicineUploadProps> = ({ onImage
         onChange={handleChange}
         multiple
         disabled={isLoading}
+      />
+      
+      <CameraCapture
+        isOpen={showCamera}
+        onCapture={handleCameraCapture}
+        onClose={() => setShowCamera(false)}
       />
     </div>
   );
