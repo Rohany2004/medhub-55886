@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, CameraOff, RotateCw, ScanLine } from 'lucide-react';
+import { BrowserMultiFormatReader } from '@zxing/library';
 
 interface BarcodeScannerProps {
   onScanResult: (barcode: string) => void;
@@ -15,12 +16,19 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
   const [isScanning, setIsScanning] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [codeReader, setCodeReader] = useState<BrowserMultiFormatReader | null>(null);
   const { toast } = useToast();
 
   const startScanning = async () => {
     try {
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
+      
+      // Initialize the code reader
+      const reader = new BrowserMultiFormatReader();
+      setCodeReader(reader);
+      
+      // Start continuous scanning
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: { 
           facingMode: 'environment',
           width: { ideal: 1280 },
@@ -28,25 +36,42 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
         }
       });
       
-      setStream(mediaStream);
+      setStream(stream);
       
       if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
+        videoRef.current.srcObject = stream;
         videoRef.current.play();
         setIsScanning(true);
+        
+        // Start decoding from video stream
+        reader.decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
+          if (result) {
+            const barcode = result.getText();
+            onScanResult(barcode);
+            toast({
+              title: "Barcode Detected",
+              description: `Scanned: ${barcode}`,
+            });
+            stopScanning();
+          }
+        });
       }
     } catch (err) {
-      console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please check permissions.');
+      console.error('Error accessing camera or scanning barcode:', err);
+      setError('Unable to access camera or scan barcode. Please check permissions.');
       toast({
-        title: "Camera Error",
-        description: "Unable to access camera. Please check permissions.",
+        title: "Scanner Error",
+        description: "Unable to access camera or scan barcode. Please check permissions.",
         variant: "destructive",
       });
     }
   };
 
   const stopScanning = () => {
+    if (codeReader) {
+      codeReader.reset();
+      setCodeReader(null);
+    }
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
@@ -54,29 +79,29 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
     setIsScanning(false);
   };
 
-  const captureFrame = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+  const captureFrame = async () => {
+    if (!codeReader || !videoRef.current) return;
     
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) return;
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-    
-    // Simulate barcode detection (in a real app, you'd use a library like ZXing)
-    // For demo purposes, we'll generate a random barcode after a short delay
-    setTimeout(() => {
-      const mockBarcode = Math.random().toString().substr(2, 12);
-      onScanResult(mockBarcode);
+    try {
+      const result = await codeReader.decodeFromVideoElement(videoRef.current);
+      
+      if (result) {
+        const barcode = result.getText();
+        onScanResult(barcode);
+        toast({
+          title: "Barcode Detected",
+          description: `Scanned: ${barcode}`,
+        });
+        stopScanning();
+      }
+    } catch (err) {
+      console.error('Error scanning barcode:', err);
       toast({
-        title: "Barcode Detected",
-        description: `Scanned: ${mockBarcode}`,
+        title: "Scan Failed",
+        description: "No barcode detected. Please try again.",
+        variant: "destructive",
       });
-    }, 1000);
+    }
   };
 
   useEffect(() => {
@@ -128,21 +153,14 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
         )}
 
         <div className="flex gap-2">
-          {!isScanning ? (
-            <Button onClick={startScanning} className="btn-medical flex-1">
-              <Camera className="w-4 h-4 mr-2" />
-              Start Scanning
+          <Button onClick={startScanning} className="btn-medical flex-1" disabled={isScanning}>
+            <Camera className="w-4 h-4 mr-2" />
+            {isScanning ? 'Scanning...' : 'Start Scanning'}
+          </Button>
+          {isScanning && (
+            <Button onClick={stopScanning} variant="outline">
+              <CameraOff className="w-4 h-4" />
             </Button>
-          ) : (
-            <>
-              <Button onClick={captureFrame} className="btn-accent flex-1">
-                <ScanLine className="w-4 h-4 mr-2" />
-                Scan Now
-              </Button>
-              <Button onClick={stopScanning} variant="outline">
-                <CameraOff className="w-4 h-4" />
-              </Button>
-            </>
           )}
           <Button onClick={onClose} variant="outline">
             Close
@@ -150,7 +168,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onScanResult, onClose }
         </div>
 
         <div className="text-xs text-muted-foreground text-center">
-          Position the barcode within the scanning area and tap "Scan Now"
+          Position the barcode within the camera view. Scanning will happen automatically.
         </div>
       </CardContent>
     </Card>

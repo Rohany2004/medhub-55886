@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { Heart, AlertTriangle, CheckCircle, Plus, X, Search, Shield } from 'lucide-react';
 
 interface DrugInteraction {
@@ -58,62 +59,41 @@ const InteractionChecker: React.FC = () => {
 
     setIsChecking(true);
     
-    // Simulate API call for drug interactions
-    // In a real app, this would call a drug interaction API
-    setTimeout(() => {
-      const mockResults: InteractionResult[] = [];
-      
-      for (let i = 0; i < medicines.length; i++) {
-        for (let j = i + 1; j < medicines.length; j++) {
-          const drug1 = medicines[i];
-          const drug2 = medicines[j];
-          
-          // Mock interaction detection based on common drug names
-          let interaction: DrugInteraction | null = null;
-          
-          if ((drug1.toLowerCase().includes('warfarin') && drug2.toLowerCase().includes('aspirin')) ||
-              (drug1.toLowerCase().includes('aspirin') && drug2.toLowerCase().includes('warfarin'))) {
-            interaction = {
-              severity: 'high',
-              description: 'Increased risk of bleeding when taken together.',
-              recommendation: 'Consult your doctor immediately. This combination requires careful monitoring.'
-            };
-          } else if ((drug1.toLowerCase().includes('ibuprofen') && drug2.toLowerCase().includes('aspirin')) ||
-                     (drug1.toLowerCase().includes('aspirin') && drug2.toLowerCase().includes('ibuprofen'))) {
-            interaction = {
-              severity: 'moderate',
-              description: 'Both are NSAIDs and may increase risk of stomach irritation.',
-              recommendation: 'Take with food and consider spacing doses apart.'
-            };
-          } else if (Math.random() > 0.7) {
-            // Random mild interactions for demo
-            interaction = {
-              severity: 'low',
-              description: 'Minor interaction detected. May slightly affect absorption.',
-              recommendation: 'Take doses 2 hours apart for best results.'
-            };
-          }
-          
-          mockResults.push({
-            drug1,
-            drug2,
-            interaction
-          });
-        }
+    try {
+      // Call the real drug interactions edge function
+      const { data, error } = await supabase.functions.invoke('drug-interactions', {
+        body: { medicines }
+      });
+
+      if (error) {
+        throw error;
       }
+
+      setResults(data.results);
       
-      setResults(mockResults);
-      setIsChecking(false);
-      
-      const highRiskCount = mockResults.filter(r => r.interaction?.severity === 'high').length;
+      const highRiskCount = data.results.filter((r: InteractionResult) => r.interaction?.severity === 'high').length;
       if (highRiskCount > 0) {
         toast({
           title: "High Risk Interactions Found",
           description: `${highRiskCount} high-risk interaction(s) detected. Please consult your doctor.`,
           variant: "destructive",
         });
+      } else {
+        toast({
+          title: "Interaction Check Complete",
+          description: "Drug interaction analysis completed successfully.",
+        });
       }
-    }, 2000);
+    } catch (error) {
+      console.error('Error checking interactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to check drug interactions. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChecking(false);
+    }
   };
 
   const getSeverityIcon = (severity: string) => {
