@@ -18,3 +18,9 @@ verify_jwt = false
 
 [functions.ocr-prescription]
 verify_jwt = false
+
+[functions.translate-medical-content]
+verify_jwt = false
+
+[functions.medical-chat-assistant]
+verify_jwt = false

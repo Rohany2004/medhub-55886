@@ -1,8 +1,12 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, AlertCircle, CheckCircle, Info, ArrowRight } from 'lucide-react';
+import LanguageSwitcher, { Language } from './LanguageSwitcher';
+import MedicalImageDisplay from './MedicalImageDisplay';
+import ReportChatInterface from './ReportChatInterface';
+import MedicalDisclaimer from './MedicalDisclaimer';
 
 interface ReportAnalysis {
   summary?: string;
@@ -20,7 +24,71 @@ interface ReportResultsProps {
   uploadedFiles: File[];
 }
 
+interface TranslatedAnalysis extends ReportAnalysis {
+  language?: string;
+}
+
 const ReportResults: React.FC<ReportResultsProps> = ({ analysis, isLoading, uploadedFiles }) => {
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
+  const [translatedAnalysis, setTranslatedAnalysis] = useState<TranslatedAnalysis | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+
+  // Store original language preference
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('preferred-language') as Language;
+    if (savedLanguage && ['en', 'hi', 'mr'].includes(savedLanguage)) {
+      setCurrentLanguage(savedLanguage);
+    }
+  }, []);
+
+  // Handle language changes
+  const handleLanguageChange = async (newLanguage: Language) => {
+    if (newLanguage === currentLanguage) return;
+    
+    localStorage.setItem('preferred-language', newLanguage);
+    setCurrentLanguage(newLanguage);
+
+    if (newLanguage === 'en') {
+      setTranslatedAnalysis(null);
+      return;
+    }
+
+    if (!analysis) return;
+
+    setIsTranslating(true);
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { data, error } = await supabase.functions.invoke('translate-medical-content', {
+        body: { 
+          content: analysis, 
+          targetLanguage: newLanguage,
+          contentType: 'analysis'
+        }
+      });
+
+      if (error) throw error;
+      
+      setTranslatedAnalysis({
+        ...data.translatedContent,
+        language: newLanguage
+      });
+    } catch (error) {
+      console.error('Translation error:', error);
+      // Fallback to original language on error
+      setCurrentLanguage('en');
+      setTranslatedAnalysis(null);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Get the analysis to display (translated or original)
+  const displayAnalysis = currentLanguage === 'en' ? analysis : (translatedAnalysis || analysis);
+  const reportText = analysis ? 
+    `${analysis.summary || ''} ${analysis.key_findings?.join(' ') || ''} ${analysis.diagnosis?.join(' ') || ''}`.toLowerCase() : 
+    '';
   if (isLoading) {
     return (
       <div className="w-full max-w-6xl mx-auto">
@@ -77,148 +145,191 @@ const ReportResults: React.FC<ReportResultsProps> = ({ analysis, isLoading, uplo
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto animate-fade-in">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <div className="flex justify-center items-center gap-3 mb-4">
-          <CheckCircle className="w-8 h-8 text-success" />
-          <h2 className="text-3xl font-bold">Medical Report Analysis</h2>
+    <div className="w-full max-w-7xl mx-auto animate-fade-in">
+      {/* Medical Disclaimer */}
+      {showDisclaimer && (
+        <div className="mb-6">
+          <MedicalDisclaimer 
+            onDismiss={() => setShowDisclaimer(false)}
+            language={currentLanguage}
+          />
         </div>
-        <p className="text-muted-foreground">
-          Analysis completed for {uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''}
-        </p>
-        {analysis.risk_level && (
-          <Badge className={`mt-2 ${getRiskColor(analysis.risk_level)}`}>
-            Risk Level: {analysis.risk_level.toUpperCase()}
-          </Badge>
-        )}
-      </div>
-
-      {/* Summary */}
-      {analysis.summary && (
-        <Card className="mb-6 glass-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
-              Executive Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-foreground leading-relaxed">{analysis.summary}</p>
-          </CardContent>
-        </Card>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Key Findings */}
-        {analysis.key_findings && analysis.key_findings.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-primary">
-                <CheckCircle className="w-5 h-5" />
-                Key Findings
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {analysis.key_findings.map((finding, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
-                    <span>{finding}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Diagnosis */}
-        {analysis.diagnosis && analysis.diagnosis.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent">
-                <FileText className="w-5 h-5" />
-                Diagnosis
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {analysis.diagnosis.map((diag, index) => (
-                  <Badge key={index} variant="secondary" className="mr-2 mb-2">
-                    {diag}
-                  </Badge>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Header with Language Switcher */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-8">
+        <div className="text-center lg:text-left mb-4 lg:mb-0">
+          <div className="flex justify-center lg:justify-start items-center gap-3 mb-4">
+            <CheckCircle className="w-8 h-8 text-success" />
+            <h2 className="text-3xl font-bold">Medical Report Analysis</h2>
+          </div>
+          <p className="text-muted-foreground">
+            Analysis completed for {uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''}
+          </p>
+          {displayAnalysis?.risk_level && (
+            <Badge className={`mt-2 ${getRiskColor(displayAnalysis.risk_level)}`}>
+              Risk Level: {displayAnalysis.risk_level.toUpperCase()}
+            </Badge>
+          )}
+        </div>
+        
+        <div className="flex justify-center lg:justify-end">
+          <LanguageSwitcher
+            currentLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChange}
+            isTranslating={isTranslating}
+          />
+        </div>
       </div>
 
-      {/* Medical Terms */}
-      {analysis.medical_terms && analysis.medical_terms.length > 0 && (
-        <Card className="mb-6 glass-card">
-          <CardHeader>
-            <CardTitle>Medical Terms Explained</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {analysis.medical_terms.map((term, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-primary mb-2">{term.term}</h4>
-                  <p className="text-sm text-muted-foreground">{term.explanation}</p>
+      {/* Main Content Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main Analysis Content */}
+        <div className="lg:col-span-3 space-y-6">
+
+          {/* Summary */}
+          {displayAnalysis?.summary && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  Executive Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground leading-relaxed">{displayAnalysis.summary}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Key Findings */}
+            {displayAnalysis?.key_findings && displayAnalysis.key_findings.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary">
+                    <CheckCircle className="w-5 h-5" />
+                    Key Findings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {displayAnalysis.key_findings.map((finding, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <ArrowRight className="w-4 h-4 mt-0.5 text-primary flex-shrink-0" />
+                        <span>{finding}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Diagnosis */}
+            {displayAnalysis?.diagnosis && displayAnalysis.diagnosis.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-accent">
+                    <FileText className="w-5 h-5" />
+                    Diagnosis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {displayAnalysis.diagnosis.map((diag, index) => (
+                      <Badge key={index} variant="secondary" className="mr-2 mb-2">
+                        {diag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Medical Terms */}
+          {displayAnalysis?.medical_terms && displayAnalysis.medical_terms.length > 0 && (
+            <Card className="glass-card">
+              <CardHeader>
+                <CardTitle>Medical Terms Explained</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {displayAnalysis.medical_terms.map((term, index) => (
+                    <div key={index} className="p-4 border rounded-lg">
+                      <h4 className="font-semibold text-primary mb-2">{term.term}</h4>
+                      <p className="text-sm text-muted-foreground">{term.explanation}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+              </CardContent>
+            </Card>
+          )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recommendations */}
-        {analysis.recommendations && analysis.recommendations.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-success">
-                <CheckCircle className="w-5 h-5" />
-                Recommendations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {analysis.recommendations.map((rec, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <ArrowRight className="w-4 h-4 mt-0.5 text-success flex-shrink-0" />
-                    <span>{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Recommendations */}
+            {displayAnalysis?.recommendations && displayAnalysis.recommendations.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-success">
+                    <CheckCircle className="w-5 h-5" />
+                    Recommendations
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {displayAnalysis.recommendations.map((rec, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <ArrowRight className="w-4 h-4 mt-0.5 text-success flex-shrink-0" />
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
 
-        {/* Next Steps */}
-        {analysis.next_steps && analysis.next_steps.length > 0 && (
-          <Card className="glass-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent">
-                <ArrowRight className="w-5 h-5" />
-                Next Steps
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ol className="space-y-2">
-                {analysis.next_steps.map((step, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-6 h-6 bg-accent text-accent-foreground rounded-full text-sm flex items-center justify-center">
-                      {index + 1}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </CardContent>
-          </Card>
-        )}
+            {/* Next Steps */}
+            {displayAnalysis?.next_steps && displayAnalysis.next_steps.length > 0 && (
+              <Card className="glass-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-accent">
+                    <ArrowRight className="w-5 h-5" />
+                    Next Steps
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ol className="space-y-2">
+                    {displayAnalysis.next_steps.map((step, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <span className="flex-shrink-0 w-6 h-6 bg-accent text-accent-foreground rounded-full text-sm flex items-center justify-center">
+                          {index + 1}
+                        </span>
+                        <span>{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          <MedicalImageDisplay 
+            reportText={reportText}
+            language={currentLanguage}
+          />
+        </div>
+      </div>
+
+      {/* Chat Interface */}
+      <div className="mt-8">
+        <ReportChatInterface
+          reportContext={displayAnalysis}
+          language={currentLanguage}
+        />
       </div>
     </div>
   );
