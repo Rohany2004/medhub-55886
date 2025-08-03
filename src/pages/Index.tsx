@@ -166,36 +166,8 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Complete the 3x3 Grid with Community Feature */}
+            {/* Single feature card */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
-                  <MessageSquare className="w-10 h-10 text-primary" />
-                </div>
-                <h3 className="text-2xl font-semibold mb-4">Community Q&A</h3>
-                <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Ask health questions and get answers from the community 
-                  and AI-powered assistance.
-                </p>
-                <Button onClick={() => window.location.href = '/community-qa'} className="btn-medical w-full text-lg py-4">
-                  Join Community
-                </Button>
-              </div>
-              
-              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
-                  <Pill className="w-10 h-10 text-accent" />
-                </div>
-                <h3 className="text-2xl font-semibold mb-4">Multiple Medicines</h3>
-                <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Upload multiple medicine images at once and get comprehensive 
-                  analysis for all your medications.
-                </p>
-                <Button onClick={() => window.location.href = '/multiple-medicines'} className="btn-accent w-full text-lg py-4">
-                  Analyze Multiple
-                </Button>
-              </div>
-
               <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Activity className="w-10 h-10 text-secondary" />
