@@ -109,19 +109,6 @@ const Index = () => {
                 </Button>
               </div>
 
-              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <ScanLine className="w-10 h-10 text-secondary" />
-                </div>
-                <h3 className="text-2xl font-semibold mb-4">Barcode Scanner</h3>
-                <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Quickly identify medicines by scanning their barcodes with your 
-                  device camera for instant results.
-                </p>
-                <Button onClick={() => window.location.href = '/barcode-scanner'} className="btn-secondary w-full text-lg py-4">
-                  Scan Barcode
-                </Button>
-              </div>
 
               <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
