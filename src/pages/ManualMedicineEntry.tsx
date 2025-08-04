@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import CameraCapture from '@/components/CameraCapture';
+import TrialLimitWrapper from '@/components/TrialLimitWrapper';
+import { useTrialLimit } from '@/hooks/useTrialLimit';
 
 const medicineSchema = z.object({
   medicine_name: z.string().min(1, 'Medicine name is required'),
@@ -40,6 +42,7 @@ const ManualMedicineEntry = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { canUseFeature, incrementTrialUsage, remainingTries, isAuthenticated } = useTrialLimit();
 
   const handleHome = () => {
     navigate('/');
@@ -91,6 +94,15 @@ const ManualMedicineEntry = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Check trial limit for unregistered users
+    if (!canUseFeature()) {
+      return;
+    }
+
+    if (!incrementTrialUsage()) {
+      return; // Trial limit reached, modal will show
     }
 
     setIsGeneratingDetails(true);
@@ -212,16 +224,17 @@ const ManualMedicineEntry = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navigation 
-        onHome={handleHome}
-        onNewUpload={handleNewUpload}
-        showBackButton={true} 
-      />
-      
-      <div className="pt-16 px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12 animate-fade-in">
+    <TrialLimitWrapper featureName="Manual Medicine Entry">
+      <div className="min-h-screen">
+        <Navigation 
+          onHome={handleHome}
+          onNewUpload={handleNewUpload}
+          showBackButton={true} 
+        />
+        
+        <div className="pt-16 px-4 py-12">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12 animate-fade-in">
             <div className="mx-auto mb-8 w-24 h-24 rounded-full glass-card flex items-center justify-center">
               <Pill className="w-12 h-12 text-primary" />
             </div>
@@ -232,6 +245,11 @@ const ManualMedicineEntry = () => {
             
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Upload a photo and manually enter your medicine details. Use AI to auto-fill information or enter everything yourself.
+              {!isAuthenticated && remainingTries !== null && (
+                <span className="block mt-4 text-lg font-medium text-primary">
+                  {remainingTries > 0 ? `${remainingTries} free AI generations remaining` : 'Sign up to continue using AI features'}
+                </span>
+              )}
             </p>
           </div>
 
@@ -458,16 +476,17 @@ const ManualMedicineEntry = () => {
               </Form>
             </CardContent>
             </Card>
+            
+            <CameraCapture
+              isOpen={showCamera}
+              onCapture={handleCameraCapture}
+              onClose={() => setShowCamera(false)}
+            />
           </div>
-          
-          <CameraCapture
-            isOpen={showCamera}
-            onCapture={handleCameraCapture}
-            onClose={() => setShowCamera(false)}
-          />
         </div>
       </div>
-    );
-  };
+    </TrialLimitWrapper>
+  );
+};
 
 export default ManualMedicineEntry;

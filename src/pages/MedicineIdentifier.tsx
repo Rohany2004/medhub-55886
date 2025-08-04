@@ -8,6 +8,8 @@ import EnhancedMedicineUpload from '@/components/EnhancedMedicineUpload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Pill, AlertTriangle, Upload } from 'lucide-react';
+import TrialLimitWrapper from '@/components/TrialLimitWrapper';
+import { useTrialLimit } from '@/hooks/useTrialLimit';
 
 type IdentifierState = 'home' | 'upload' | 'results';
 
@@ -36,6 +38,7 @@ const MedicineIdentifier = () => {
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const { toast } = useToast();
+  const { canUseFeature, incrementTrialUsage, remainingTries, isAuthenticated } = useTrialLimit();
 
   const handleHome = () => {
     setCurrentState('home');
@@ -91,6 +94,15 @@ const MedicineIdentifier = () => {
   };
 
   const handleImageUpload = async (files: File[]) => {
+    // Check trial limit for unregistered users
+    if (!canUseFeature()) {
+      return;
+    }
+
+    if (!incrementTrialUsage()) {
+      return; // Trial limit reached, modal will show
+    }
+
     setIsAnalyzing(true);
     setCurrentState('results');
 
@@ -129,14 +141,15 @@ const MedicineIdentifier = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navigation 
-        onHome={handleHome}
-        onNewUpload={handleNewUpload}
-        showBackButton={currentState !== 'home'}
-      />
-      
-      <div className="pt-16">
+    <TrialLimitWrapper featureName="Medicine Identifier">
+      <div className="min-h-screen">
+        <Navigation 
+          onHome={handleHome}
+          onNewUpload={handleNewUpload}
+          showBackButton={currentState !== 'home'}
+        />
+        
+        <div className="pt-16">
         {currentState === 'home' && (
           <div className="min-h-screen px-4 py-12">
             <div className="max-w-6xl mx-auto mb-8">
@@ -154,6 +167,11 @@ const MedicineIdentifier = () => {
               <p className="text-xl text-muted-foreground mb-12 max-w-3xl mx-auto">
                 Identify and analyze your medicines with AI-powered recognition. 
                 Upload one or multiple medicine photos for instant detailed information.
+                {!isAuthenticated && remainingTries !== null && (
+                  <span className="block mt-4 text-lg font-medium text-primary">
+                    {remainingTries > 0 ? `${remainingTries} free tries remaining` : 'Sign up to continue using this feature'}
+                  </span>
+                )}
               </p>
             </div>
 
@@ -342,8 +360,9 @@ const MedicineIdentifier = () => {
             )}
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </TrialLimitWrapper>
   );
 };
 

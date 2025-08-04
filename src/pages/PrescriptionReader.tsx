@@ -7,6 +7,8 @@ import Navigation from '@/components/Navigation';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import TrialLimitWrapper from '@/components/TrialLimitWrapper';
+import { useTrialLimit } from '@/hooks/useTrialLimit';
 
 const PrescriptionReader = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -15,6 +17,7 @@ const PrescriptionReader = () => {
   const [results, setResults] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { canUseFeature, incrementTrialUsage, remainingTries, isAuthenticated } = useTrialLimit();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -41,6 +44,15 @@ const PrescriptionReader = () => {
         variant: "destructive",
       });
       return;
+    }
+
+    // Check trial limit for unregistered users
+    if (!canUseFeature()) {
+      return;
+    }
+
+    if (!incrementTrialUsage()) {
+      return; // Trial limit reached, modal will show
     }
 
     setLoading(true);
@@ -89,15 +101,21 @@ const PrescriptionReader = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navigation onHome={handleHome} onNewUpload={handleNewUpload} showBackButton={true} />
-      
-      <div className="pt-16">
+    <TrialLimitWrapper featureName="Prescription Reader">
+      <div className="min-h-screen">
+        <Navigation onHome={handleHome} onNewUpload={handleNewUpload} showBackButton={true} />
+        
+        <div className="pt-16">
         <div className="max-w-4xl mx-auto p-6">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-4">Prescription Reader</h1>
             <p className="text-xl text-muted-foreground">
               Upload your prescription to extract medicine information using OCR
+              {!isAuthenticated && remainingTries !== null && (
+                <span className="block mt-4 text-lg font-medium text-primary">
+                  {remainingTries > 0 ? `${remainingTries} free prescription reads remaining` : 'Sign up to continue using this feature'}
+                </span>
+              )}
             </p>
           </div>
 
@@ -229,8 +247,9 @@ const PrescriptionReader = () => {
             </p>
           </div>
         </div>
+        </div>
       </div>
-    </div>
+    </TrialLimitWrapper>
   );
 };
 

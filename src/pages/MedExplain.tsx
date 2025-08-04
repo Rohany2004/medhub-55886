@@ -6,6 +6,8 @@ import Navigation from '@/components/Navigation';
 import ReportUpload from '@/components/ReportUpload';
 import ReportResults from '@/components/ReportResults';
 import { FileText, Shield, Zap, Users } from 'lucide-react';
+import TrialLimitWrapper from '@/components/TrialLimitWrapper';
+import { useTrialLimit } from '@/hooks/useTrialLimit';
 
 type MedExplainState = 'home' | 'upload' | 'results';
 
@@ -25,6 +27,7 @@ const MedExplain = () => {
   const [analysis, setAnalysis] = useState<ReportAnalysis | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const { toast } = useToast();
+  const { canUseFeature, incrementTrialUsage, remainingTries, isAuthenticated } = useTrialLimit();
 
   const handleGetStarted = () => {
     setCurrentState('upload');
@@ -74,6 +77,15 @@ const MedExplain = () => {
   };
 
   const handleReportUpload = async (files: File[]) => {
+    // Check trial limit for unregistered users
+    if (!canUseFeature()) {
+      return;
+    }
+
+    if (!incrementTrialUsage()) {
+      return; // Trial limit reached, modal will show
+    }
+
     setIsAnalyzing(true);
     setCurrentState('results');
     setUploadedFiles(files);
@@ -101,14 +113,15 @@ const MedExplain = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navigation 
-        onHome={handleHome}
-        onNewUpload={handleNewUpload}
-        showBackButton={currentState !== 'home'}
-      />
-      
-      <div className="pt-16">
+    <TrialLimitWrapper featureName="MedExplain">
+      <div className="min-h-screen">
+        <Navigation 
+          onHome={handleHome}
+          onNewUpload={handleNewUpload}
+          showBackButton={currentState !== 'home'}
+        />
+        
+        <div className="pt-16">
         {currentState === 'home' && (
           <div className="min-h-screen px-4 py-12">
             {/* Hero Section */}
@@ -124,6 +137,11 @@ const MedExplain = () => {
               <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
                 Transform complex medical reports into simple, understandable insights. 
                 Our AI-powered platform helps you understand your health data better.
+                {!isAuthenticated && remainingTries !== null && (
+                  <span className="block mt-4 text-lg font-medium text-primary">
+                    {remainingTries > 0 ? `${remainingTries} free tries remaining` : 'Sign up to continue using this feature'}
+                  </span>
+                )}
               </p>
               
               <Button 
@@ -222,8 +240,9 @@ const MedExplain = () => {
             />
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </TrialLimitWrapper>
   );
 };
 
