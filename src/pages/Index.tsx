@@ -37,7 +37,7 @@ const Index = () => {
               </p>
             </div>
 
-            {/* Main Features - Perfect 3x3 Symmetrical Grid */}
+            {/* Main Features - Balanced Grid Layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
               <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
@@ -109,7 +109,6 @@ const Index = () => {
                 </Button>
               </div>
 
-
               <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Heart className="w-10 h-10 text-primary" />
@@ -151,13 +150,10 @@ const Index = () => {
                   Read Prescription
                 </Button>
               </div>
-            </div>
 
-            {/* Single feature card - Centered */}
-            <div className="flex justify-center mb-20">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col max-w-md w-full">
-                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <Activity className="w-10 h-10 text-secondary" />
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-10 h-10 text-primary" />
                 </div>
                 <h3 className="text-2xl font-semibold mb-4">Health Analytics</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
