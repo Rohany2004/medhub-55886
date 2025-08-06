@@ -153,9 +153,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Single feature card */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col">
+            {/* Single feature card - Centered */}
+            <div className="flex justify-center mb-20">
+              <div className="glass-card p-8 rounded-xl text-center hover-lift h-full flex flex-col max-w-md w-full">
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Activity className="w-10 h-10 text-secondary" />
                 </div>
@@ -214,7 +214,15 @@ const Index = () => {
 
             {/* Call to Action - Perfectly Centered */}
             <div className="text-center">
-              
+              <div className="glass-card p-12 rounded-2xl max-w-2xl mx-auto">
+                <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+                <p className="text-xl text-muted-foreground mb-8">
+                  Join thousands of users who trust our AI-powered medical assistant
+                </p>
+                <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg px-12 py-4">
+                  Start Now
+                </Button>
+              </div>
             </div>
             
           </div>
