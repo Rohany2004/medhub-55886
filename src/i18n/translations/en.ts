@@ -96,6 +96,22 @@ const en = {
     title: "Medicine Interaction Checker",
     subtitle: "Check for potential interactions between your medicines",
   },
+  medExplain: {
+    title: "MedExplain",
+    tagline: "Transform complex medical reports into simple, understandable insights. Our AI-powered platform helps you understand your health data better.",
+    getStarted: "Get Started",
+  },
+  medicineIdentifier: {
+    title: "Medicine Identifier",
+    tagline: "Identify and analyze your medicines with AI-powered recognition. Upload one or multiple medicine photos for instant detailed information.",
+    uploadCardTitle: "Upload Medicine Photos",
+    uploadCardCta: "Start Analysis",
+  },
+  breadcrumbs: {
+    medicineIdentifier: "Medicine Identifier",
+    upload: "Upload",
+    results: "Results"
+  }
 };
 
 export default en;

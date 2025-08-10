@@ -34,7 +34,7 @@ const Navigation: React.FC<NavigationProps> = ({
 
           {/* Navigation Items */}
           <div className="flex items-center gap-4">
-            <LanguageSwitcher currentLanguage={language as any} onLanguageChange={(code) => setLanguage(code as any)} />
+            <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
             {showBackButton && (
               <Button onClick={onHome} variant="ghost" className="hover-lift">
                 {t('nav.back')}

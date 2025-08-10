@@ -44,13 +44,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Camera className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Medicine Identifier</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.medicineIdentifier.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Identify medicines instantly by uploading photos. Get detailed information about 
-                  composition, uses, dosage, and safety warnings.
+                  {t('features.medicineIdentifier.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical w-full text-lg py-4">
-                  Identify Medicine
+                  {t('features.medicineIdentifier.cta')}
                 </Button>
               </div>
               
@@ -58,13 +57,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <FileText className="w-10 h-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">MedExplain</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.medExplain.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Transform complex medical reports into simple, understandable insights. 
-                  Get explanations of medical terms and diagnosis.
+                  {t('features.medExplain.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/medexplain'} className="btn-accent w-full text-lg py-4">
-                  Analyze Reports
+                  {t('features.medExplain.cta')}
                 </Button>
               </div>
 
@@ -72,13 +70,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Edit className="w-10 h-10 text-secondary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Medicine Entry</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.medicineEntry.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Manually add medicine details with photo upload. Use AI to auto-fill information 
-                  or enter everything yourself.
+                  {t('features.medicineEntry.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/manual-medicine-entry'} className="btn-secondary w-full text-lg py-4">
-                  Add Medicine
+                  {t('features.medicineEntry.cta')}
                 </Button>
               </div>
 
@@ -86,13 +83,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Pill className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">My Medicines</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.myMedicines.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  View and manage your saved medicine collection. Search, edit, and organize 
-                  all your medicine entries in one place.
+                  {t('features.myMedicines.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/my-medicines'} className="btn-medical w-full text-lg py-4">
-                  View Collection
+                  {t('features.myMedicines.cta')}
                 </Button>
               </div>
 
@@ -100,13 +96,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <Activity className="w-10 h-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Health Dashboard</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.dashboard.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Track your medicine usage, expiry dates, and get health insights 
-                  all in one personalized dashboard.
+                  {t('features.dashboard.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/dashboard'} className="btn-accent w-full text-lg py-4">
-                  View Dashboard
+                  {t('features.dashboard.cta')}
                 </Button>
               </div>
 
@@ -114,13 +109,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Heart className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Interaction Checker</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.interactionChecker.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Check for potential dangerous interactions between multiple 
-                  medicines to ensure your safety.
+                  {t('features.interactionChecker.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/interaction-checker'} className="btn-medical w-full text-lg py-4">
-                  Check Interactions
+                  {t('features.interactionChecker.cta')}
                 </Button>
               </div>
 
@@ -128,13 +122,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                   <Search className="w-10 h-10 text-accent" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Symptom Checker</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.symptomChecker.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Describe your symptoms and get AI-powered health insights and 
-                  possible condition suggestions.
+                  {t('features.symptomChecker.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/symptom-checker'} className="btn-accent w-full text-lg py-4">
-                  Check Symptoms
+                  {t('features.symptomChecker.cta')}
                 </Button>
               </div>
 
@@ -142,13 +135,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                   <Stethoscope className="w-10 h-10 text-secondary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Prescription Reader</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.prescriptionReader.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Upload prescription images to extract medicine information 
-                  using advanced OCR technology.
+                  {t('features.prescriptionReader.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/prescription-reader'} className="btn-secondary w-full text-lg py-4">
-                  Read Prescription
+                  {t('features.prescriptionReader.cta')}
                 </Button>
               </div>
 
@@ -156,13 +148,12 @@ const Index = () => {
                 <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                   <Activity className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4">Health Analytics</h3>
+                <h3 className="text-2xl font-semibold mb-4">{t('features.healthAnalytics.title')}</h3>
                 <p className="text-muted-foreground mb-6 text-lg flex-grow">
-                  Get detailed insights about your health patterns, medicine usage, 
-                  and personalized recommendations.
+                  {t('features.healthAnalytics.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/dashboard'} className="btn-secondary w-full text-lg py-4">
-                  View Analytics
+                  {t('features.healthAnalytics.cta')}
                 </Button>
               </div>
             </div>
