@@ -4,7 +4,9 @@ import Navigation from '@/components/Navigation';
 import FloatingMedicalIcons from '@/components/FloatingMedicalIcons';
 import { FileText, Camera, Pill, Shield, Zap, Users, Edit, Activity, Heart, Search, Stethoscope, MessageSquare } from 'lucide-react';
 import { ScanLine } from 'lucide-react';
+import { useI18n } from '@/i18n/I18nProvider';
 const Index = () => {
+  const { t } = useI18n();
   const handleHome = () => {
     // Already on home page
   };
@@ -28,12 +30,11 @@ const Index = () => {
               </div>
               
               <h1 className="text-6xl font-bold text-foreground mb-6">
-                Medical AI Assistant
+                {t('app.title')}
               </h1>
               
               <p className="text-2xl text-muted-foreground mb-12 max-w-4xl mx-auto">
-                Your intelligent companion for medicine identification and medical report analysis. 
-                Powered by advanced AI technology for accurate and reliable healthcare insights.
+                {t('app.tagline')}
               </p>
             </div>
 
@@ -169,7 +170,7 @@ const Index = () => {
             {/* Why Choose Us Section - Perfect Symmetry */}
             <div className="mb-20">
               <h2 className="text-4xl font-bold text-center mb-12">
-                Why Choose Our Platform?
+                {t('why.title')}
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -177,10 +178,9 @@ const Index = () => {
                   <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
                     <Zap className="w-10 h-10 text-primary" />
                   </div>
-                  <h4 className="text-2xl font-semibold mb-4">Lightning Fast</h4>
+                  <h4 className="text-2xl font-semibold mb-4">{t('why.fast.title')}</h4>
                   <p className="text-muted-foreground text-lg flex-grow">
-                    Get instant results with our advanced AI processing technology 
-                    for immediate healthcare insights.
+                    {t('why.fast.desc')}
                   </p>
                 </div>
                 
@@ -188,10 +188,9 @@ const Index = () => {
                   <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
                     <Shield className="w-10 h-10 text-accent" />
                   </div>
-                  <h4 className="text-2xl font-semibold mb-4">Secure & Private</h4>
+                  <h4 className="text-2xl font-semibold mb-4">{t('why.secure.title')}</h4>
                   <p className="text-muted-foreground text-lg flex-grow">
-                    Your medical data is processed securely with enterprise-grade 
-                    encryption and privacy protection.
+                    {t('why.secure.desc')}
                   </p>
                 </div>
                 
@@ -199,10 +198,9 @@ const Index = () => {
                   <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
                     <Users className="w-10 h-10 text-secondary" />
                   </div>
-                  <h4 className="text-2xl font-semibold mb-4">User-Friendly</h4>
+                  <h4 className="text-2xl font-semibold mb-4">{t('why.userFriendly.title')}</h4>
                   <p className="text-muted-foreground text-lg flex-grow">
-                    Simple interface designed for everyone, with clear explanations 
-                    and intuitive navigation.
+                    {t('why.userFriendly.desc')}
                   </p>
                 </div>
               </div>
@@ -211,12 +209,12 @@ const Index = () => {
             {/* Call to Action - Perfectly Centered */}
             <div className="text-center">
               <div className="glass-card p-12 rounded-2xl max-w-2xl mx-auto">
-                <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
+                <h2 className="text-3xl font-bold mb-6">{t('cta.title')}</h2>
                 <p className="text-xl text-muted-foreground mb-8">
-                  Join thousands of users who trust our AI-powered medical assistant
+                  {t('cta.desc')}
                 </p>
                 <Button onClick={() => window.location.href = '/medicine-identifier'} className="btn-medical text-lg px-12 py-4">
-                  Start Now
+                  {t('cta.button')}
                 </Button>
               </div>
             </div>

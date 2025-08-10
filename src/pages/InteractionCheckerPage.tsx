@@ -3,8 +3,10 @@ import Navigation from '@/components/Navigation';
 import Breadcrumb from '@/components/Breadcrumb';
 import InteractionChecker from '@/components/InteractionChecker';
 import { Heart } from 'lucide-react';
+import { useI18n } from '@/i18n/I18nProvider';
 
 const InteractionCheckerPage = () => {
+  const { t } = useI18n();
   const handleHome = () => {
     window.location.href = '/';
   };
@@ -20,7 +22,7 @@ const InteractionCheckerPage = () => {
       <div className="pt-16 px-4 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <Breadcrumb items={[{ label: 'Interaction Checker', active: true }]} />
+            <Breadcrumb items={[{ label: t('interaction.title'), active: true }]} />
           </div>
           
           <div className="text-center mb-12 animate-fade-in">
@@ -29,11 +31,11 @@ const InteractionCheckerPage = () => {
             </div>
             
             <h1 className="text-5xl font-bold text-foreground mb-6">
-              Medicine Interaction Checker
+              {t('interaction.title')}
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8">
-              Check for potential interactions between your medicines
+              {t('interaction.subtitle')}
             </p>
           </div>
 
