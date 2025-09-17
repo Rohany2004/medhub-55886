@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useI18n } from '@/i18n/I18nProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Mail, Calendar, Upload, Settings, LogOut } from 'lucide-react';
+import { User, Mail, Calendar, Upload, Settings, LogOut, Globe } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { useNavigate } from 'react-router-dom';
 
 interface Profile {
@@ -20,6 +22,7 @@ interface Profile {
 
 const Profile = () => {
   const { user, loading } = useAuth();
+  const { language, setLanguage } = useI18n();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -219,6 +222,25 @@ const Profile = () => {
                     <Settings className="w-4 h-4 mr-2" />
                     {isLoading ? 'Updating...' : 'Update Profile'}
                   </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Actions Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5" />
+                  Language & Preferences
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Application Language</Label>
+                  <LanguageSwitcher
+                    currentLanguage={language}
+                    onLanguageChange={setLanguage}
+                  />
                 </div>
               </CardContent>
             </Card>
