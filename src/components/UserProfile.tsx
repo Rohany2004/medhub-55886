@@ -106,7 +106,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
   return <div className="flex items-center gap-3">
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <button className="flex items-center gap-3 hover-lift rounded-lg p-2 hover:bg-white/10 transition-colors">
+          <button 
+            className="flex items-center gap-3 hover-lift rounded-lg p-2 hover:bg-white/10 transition-colors"
+            onClick={() => window.location.href = '/profile'}
+          >
             <Avatar className="w-8 h-8">
               <AvatarImage src={profile.avatar_url} alt={profile.name} />
               <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
