@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,7 +15,26 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl, userId } = await req.json();
+    // Validate input
+    const body = await req.json();
+    const schema = z.object({
+      imageUrl: z.string().url().max(2048).refine((u) => u.startsWith('https://'), { message: 'imageUrl must be https' })
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { imageUrl } = parsed.data;
+
+    // Auth check: require valid bearer token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    }
+    const token = authHeader.replace('Bearer ', '');
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
@@ -22,8 +42,18 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Verify user from token
+    const authClient = createClient(supabaseUrl, supabaseAnon);
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: corsHeaders });
+    }
+
+    // Service role client for DB writes
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Download image from storage
     const imageResponse = await fetch(imageUrl);
@@ -117,7 +147,7 @@ Extract all visible text first, then identify and structure the medical informat
     const { data: prescriptionData, error: prescriptionError } = await supabase
       .from('prescriptions')
       .insert({
-        user_id: userId,
+        user_id: userData.user.id,
         image_url: imageUrl,
         ocr_text: analysisResult.extractedText,
         doctor_name: analysisResult.doctorName,

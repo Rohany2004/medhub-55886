@@ -74,7 +74,6 @@ const PrescriptionReader = () => {
       const { data, error } = await supabase.functions.invoke('ocr-prescription', {
         body: {
           imageUrl: publicUrl,
-          userId: user.id,
         },
       });
 

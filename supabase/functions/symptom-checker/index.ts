@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +14,20 @@ serve(async (req) => {
   }
 
   try {
-    const { symptoms, age, gender } = await req.json();
+    const body = await req.json();
+    const schema = z.object({
+      symptoms: z.string().min(1).max(2000),
+      age: z.number().min(0).max(150).optional(),
+      gender: z.enum(['male', 'female', 'other']).optional(),
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { symptoms, age, gender } = parsed.data;
 
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
