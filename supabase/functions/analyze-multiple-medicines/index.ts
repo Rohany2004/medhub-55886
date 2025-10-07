@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
@@ -18,42 +17,21 @@ serve(async (req) => {
       throw new Error('No images provided');
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('Gemini API key not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log(`Analyzing ${images.length} medicine image(s) with Gemini API...`);
+    console.log(`Analyzing ${images.length} medicine image(s) with Lovable AI (gemini-2.5-flash)...`);
 
-    // Process multiple images
-    const analysisPromises = images.map(async (imageBase64: string, index: number) => {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `You are a medical expert AI. First, analyze this image to determine if it contains medicine, pharmaceutical products, or medical items.
+    const systemPrompt = `You are a medical expert AI. First, analyze this image to determine if it contains medicine, pharmaceutical products, or medical items.
 
 CRITICAL VALIDATION RULES:
 1. If the image does NOT contain medicine, pills, tablets, capsules, medical bottles, medicine packaging, pharmaceutical products, or any medical items, respond with exactly: "NOT_MEDICAL_CONTENT"
 2. If the image contains random objects, food, people, animals, landscapes, or anything non-medical, respond with exactly: "NOT_MEDICAL_CONTENT"
 3. Only proceed with analysis if the image clearly shows medicine or pharmaceutical products
 
-If the image IS medical/pharmaceutical, provide comprehensive information in JSON format:
-
-IMPORTANT INSTRUCTIONS:
-1. Identify the medicine name, brand, and any visible text on the packaging
-2. If you can identify the medicine, provide detailed information for ALL fields
-3. Use your medical knowledge to provide comprehensive details even if not all info is visible on the package
-4. For unknown medicines, research similar medications based on visible ingredients
-5. AVOID returning null values - provide general medical information when specific details aren't available
-6. If you see partial information, extrapolate based on common medical knowledge
-
-Required JSON format:
+If the image IS medical/pharmaceutical, return ONLY valid JSON in the exact schema below with no prose before or after it:
 {
   "name": "Medicine brand/trade name",
   "generic_name": "Active ingredient/generic name", 
@@ -64,74 +42,70 @@ Required JSON format:
   "side_effects": ["effect1", "effect2", "effect3"],
   "warnings": ["warning1", "warning2", "precaution"],
   "storage": "Storage conditions and temperature",
-  "prescription_required": true/false
-}
+  "prescription_required": true
+}`;
 
-For each field:
-- name: Extract from package or identify from ingredients
-- generic_name: Provide the active pharmaceutical ingredient
-- manufacturer: Company name if visible
-- composition: List all active ingredients with strengths if visible
-- uses: Provide 3-5 medical conditions/symptoms this medicine treats
-- dosage: Give standard adult dosage recommendations
-- side_effects: List 4-6 common side effects
-- warnings: Include 3-4 important precautions or contraindications
-- storage: Specify temperature and storage conditions
-- prescription_required: Determine if this requires prescription
+    const analyzeOne = async (imageBase64: string, index: number) => {
+      const payload = {
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: 'Analyze this medicine image and follow the system rules strictly.' },
+              { type: 'image_url', image_url: `data:image/jpeg;base64,${imageBase64}` },
+            ],
+          },
+        ],
+      } as const;
 
-Be thorough and provide useful medical information even when the image quality is limited.`
-              },
-              {
-                inlineData: {
-                  mimeType: "image/jpeg",
-                  data: imageBase64
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 2048,
-          }
-        }),
-      });
+      try {
+        const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Gemini API Error for image ${index + 1}:`, response.status, errorText);
-        return { error: `Failed to analyze image ${index + 1}` };
-      }
-
-      const data = await response.json();
-      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (textResponse) {
-        // Check if the content is not medical
-        if (textResponse.includes('NOT_MEDICAL_CONTENT')) {
-          return { 
-            index, 
-            error: `Image ${index + 1} is not a medicine image. Please upload photos of medicine, pills, tablets, or pharmaceutical products.` 
-          };
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`AI Gateway Error for image ${index + 1}:`, response.status, errorText);
+          if (response.status === 429) return { index, error: 'AI rate limit exceeded. Please try again shortly.' };
+          if (response.status === 402) return { index, error: 'AI credits exhausted. Please add credits and retry.' };
+          return { index, error: `Failed to analyze image ${index + 1}` };
         }
 
-        const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          try {
-            return { index, result: JSON.parse(jsonMatch[0]) };
-          } catch (parseError) {
-            console.error(`JSON parse error for image ${index + 1}:`, parseError);
-            return { error: `Failed to parse analysis for image ${index + 1}` };
+        const data = await response.json();
+        const textResponse: string | undefined = data.choices?.[0]?.message?.content;
+        if (textResponse) {
+          if (textResponse.includes('NOT_MEDICAL_CONTENT')) {
+            return { 
+              index, 
+              error: `Image ${index + 1} is not a medicine image. Please upload photos of medicine, pills, tablets, or pharmaceutical products.` 
+            };
+          }
+          const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              return { index, result: JSON.parse(jsonMatch[0]) };
+            } catch (parseError) {
+              console.error(`JSON parse error for image ${index + 1}:`, parseError);
+              return { index, error: `Failed to parse analysis for image ${index + 1}` };
+            }
           }
         }
+        return { index, error: `No valid response for image ${index + 1}` };
+      } catch (e) {
+        console.error(`Unhandled error for image ${index + 1}:`, e);
+        return { index, error: `Unexpected error for image ${index + 1}` };
       }
-      
-      return { error: `No valid response for image ${index + 1}` };
-    });
+    };
 
     // Wait for all analyses to complete
-    const results = await Promise.all(analysisPromises);
+    const results = await Promise.all(images.map((img: string, i: number) => analyzeOne(img, i)));
     
     console.log('Multiple medicine analysis completed');
     
@@ -141,7 +115,7 @@ Be thorough and provide useful medical information even when the image quality i
 
   } catch (error) {
     console.error('Error in analyze-multiple-medicines function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
