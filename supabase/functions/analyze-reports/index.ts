@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
@@ -24,31 +23,22 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
     const { files } = parsed.data;
-    
     if (!files || files.length === 0) {
       throw new Error('No files provided');
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('Gemini API key not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('AI gateway not configured');
     }
 
-    console.log(`Analyzing ${files.length} medical report(s) with Gemini API...`);
+    console.log(`Analyzing ${files.length} medical report(s) with Lovable AI gateway...`);
 
-    // Process multiple files
-    const analysisPromises = files.map(async (fileData: string) => {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              {
-                text: `You are a medical expert AI assistant. First, analyze this document/image to determine if it contains medical reports, lab results, prescriptions, or medical documents.
+    // Helper to query Lovable AI for a single image
+    async function analyzeSingleImage(fileData: string) {
+      const instructions = `You are a medical expert AI assistant. First, analyze this document/image to determine if it contains medical reports, lab results, prescriptions, or medical documents.
 
 CRITICAL VALIDATION RULES:
 1. If the document/image does NOT contain medical reports, lab results, prescriptions, medical charts, hospital documents, or any medical information, respond with exactly: "NOT_MEDICAL_REPORT"
@@ -68,10 +58,7 @@ Required JSON format:
 {
   "summary": "Brief overview of the report findings",
   "medical_terms": [
-    {
-      "term": "Medical term found in report",
-      "explanation": "Simple explanation for patients"
-    }
+    { "term": "Medical term found in report", "explanation": "Simple explanation for patients" }
   ],
   "diagnosis": ["Primary diagnosis", "Secondary diagnosis"],
   "key_findings": ["Important finding 1", "Important finding 2"],
@@ -87,60 +74,72 @@ Guidelines:
 - Suggest 2-3 specific next steps
 - Assess risk level based on findings
 - Explain medical terminology in simple terms
-- Be comprehensive but accessible to non-medical users
+- Be comprehensive but accessible to non-medical users`;
 
-Analyze the document thoroughly and provide valuable insights that help patients understand their medical reports.`
-              },
-              {
-                inlineData: {
-                  mimeType: "image/jpeg",
-                  data: fileData
-                }
-              }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.1,
-            topK: 32,
-            topP: 1,
-            maxOutputTokens: 3000,
-          }
+      const resp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash',
+          messages: [
+            { role: 'system', content: 'You are a helpful medical expert assistant. Keep answers clear and safe.' },
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: instructions },
+                { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${fileData}` } }
+              ]
+            }
+          ]
         }),
       });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Gemini API Error:', response.status, errorText);
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded. Please try again shortly.');
-        }
-        if (response.status === 402) {
-          throw new Error('Payment required. Please add credits to your workspace.');
-        }
-        throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+      if (!resp.ok) {
+        const t = await resp.text();
+        console.error('AI gateway error:', resp.status, t);
+        if (resp.status === 429) throw new Error('Rate limit exceeded. Please try again shortly.');
+        if (resp.status === 402) throw new Error('Payment required. Please add credits to your workspace.');
+        throw new Error(`AI gateway error ${resp.status}`);
       }
 
-      const data = await response.json();
-      const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      
+      const data = await resp.json();
+      let textResponse = '';
+      try {
+        const content = data.choices?.[0]?.message?.content;
+        if (typeof content === 'string') {
+          textResponse = content;
+        } else if (Array.isArray(content)) {
+          textResponse = content.map((c: any) => (c?.type === 'text' ? c.text : '')).join('');
+        }
+      } catch (_) {
+        // ignore
+      }
+
       if (textResponse) {
-        // Check if the content is not a medical report
         if (textResponse.includes('NOT_MEDICAL_REPORT')) {
           throw new Error('This is not a medical report. Please upload medical reports, lab results, prescriptions, or other medical documents.');
         }
-
         const jsonMatch = textResponse.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-          return JSON.parse(jsonMatch[0]);
+          try {
+            return JSON.parse(jsonMatch[0]);
+          } catch (_) {
+            // fallthrough
+          }
         }
       }
-      
       return null;
-    });
+    }
+
+    // Process multiple files in parallel
+    const analysisPromises = files.map((fileData: string) => analyzeSingleImage(fileData));
 
     // Wait for all analyses to complete
     const results = await Promise.all(analysisPromises);
-    const validResults = results.filter(result => result !== null);
+    const validResults = results.filter((r) => r !== null);
 
     if (validResults.length === 0) {
       throw new Error('No valid analysis results from any file');
@@ -151,29 +150,33 @@ Analyze the document thoroughly and provide valuable insights that help patients
     if (validResults.length === 1) {
       combinedAnalysis = validResults[0];
     } else {
-      // Combine multiple analyses
       combinedAnalysis = {
-        summary: `Analysis of ${validResults.length} medical documents: ${validResults.map(r => r.summary).join(' | ')}`,
-        medical_terms: validResults.flatMap(r => r.medical_terms || []).slice(0, 10),
-        diagnosis: [...new Set(validResults.flatMap(r => r.diagnosis || []))],
-        key_findings: [...new Set(validResults.flatMap(r => r.key_findings || []))],
-        recommendations: [...new Set(validResults.flatMap(r => r.recommendations || []))],
-        next_steps: [...new Set(validResults.flatMap(r => r.next_steps || []))],
-        risk_level: validResults.some(r => r.risk_level === 'high') ? 'high' : 
-                   validResults.some(r => r.risk_level === 'medium') ? 'medium' : 'low'
-      };
+        summary: `Analysis of ${validResults.length} medical documents: ${validResults.map((r: any) => r.summary).join(' | ')}`,
+        medical_terms: (validResults as any[]).flatMap((r) => r.medical_terms || []).slice(0, 10),
+        diagnosis: [...new Set((validResults as any[]).flatMap((r) => r.diagnosis || []))],
+        key_findings: [...new Set((validResults as any[]).flatMap((r) => r.key_findings || []))],
+        recommendations: [...new Set((validResults as any[]).flatMap((r) => r.recommendations || []))],
+        next_steps: [...new Set((validResults as any[]).flatMap((r) => r.next_steps || []))],
+        risk_level: (validResults as any[]).some((r) => r.risk_level === 'high') ? 'high' :
+                   (validResults as any[]).some((r) => r.risk_level === 'medium') ? 'medium' : 'low'
+      } as any;
     }
 
     console.log('Medical report analysis completed successfully');
-    
+
     return new Response(JSON.stringify({ analysis: combinedAnalysis }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
-
   } catch (error) {
     console.error('Error in analyze-reports function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+
+    const msg = (error as any)?.message || 'Unknown error';
+    let status = 500;
+    if (msg.includes('Rate limit')) status = 429;
+    if (msg.includes('Payment required')) status = 402;
+
+    return new Response(JSON.stringify({ error: msg }), {
+      status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }

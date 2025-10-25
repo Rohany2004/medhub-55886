@@ -191,8 +191,9 @@ Extract all visible text first, then identify and structure the medical informat
 
   } catch (error) {
     console.error('Error in ocr-prescription function:', error);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: msg,
       extractedText: "Failed to process prescription image",
       doctorName: null,
       patientName: null,

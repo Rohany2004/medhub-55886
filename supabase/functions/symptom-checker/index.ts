@@ -104,8 +104,9 @@ Important: This is for informational purposes only and should not replace profes
 
   } catch (error) {
     console.error('Error in symptom-checker function:', error);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: msg,
       possibleConditions: ["Error analyzing symptoms"],
       recommendations: "Please consult with a healthcare provider for proper diagnosis and treatment.",
       urgencyLevel: "medium"

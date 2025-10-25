@@ -137,11 +137,12 @@ Please return only the translated text without any additional formatting or expl
 
   } catch (error) {
     console.error('Translation error:', error)
+    const msg = error instanceof Error ? error.message : 'Unknown error'
     
     return new Response(
       JSON.stringify({ 
         error: 'Translation failed', 
-        details: error.message,
+        details: msg,
         fallback: "Translation service temporarily unavailable. Showing original content."
       }),
       { 

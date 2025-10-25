@@ -100,9 +100,13 @@ const MedExplain = () => {
       });
     } catch (error) {
       console.error('Analysis error:', error);
+      const errMsg = (error as any)?.message || '';
+      let description = "Unable to analyze the reports. Please try again with clearer images.";
+      if (errMsg.includes('Rate limit')) description = "Too many requests right now. Please wait a moment and try again.";
+      if (errMsg.includes('Payment required')) description = "Service credit has run out. Please add credits and try again.";
       toast({
         title: "Analysis Failed",
-        description: "Unable to analyze the reports. Please try again with clearer images.",
+        description,
         variant: "destructive",
       });
       

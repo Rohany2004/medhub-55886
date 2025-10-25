@@ -90,8 +90,9 @@ Important: Always emphasize that this information is for educational purposes on
 
   } catch (error) {
     console.error('Error in ai-qa-assistant function:', error);
+    const msg = error instanceof Error ? error.message : 'Unknown error';
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: msg,
       answer: "I apologize, but I'm currently unable to provide an answer. Please consult with a healthcare professional for medical advice."
     }), {
       status: 500,

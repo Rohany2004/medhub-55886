@@ -183,12 +183,14 @@ Report Context: ${JSON.stringify(reportContext)}`,
       hi: "मुझे खेद है, लेकिन मैं इस समय आपके प्रश्न को संसाधित करने में असमर्थ हूं। कृपया फिर से कोशिश करें या सहायता के लिए अपने स्वास्थ्य सेवा प्रदाता से परामर्श करें।",
       mr: "मला माफ करा, परंतु मी सध्या तुमच्या प्रश्नावर प्रक्रिया करू शकत नाही. कृपया पुन्हा प्रयत्न करा किंवा सहाय्यासाठी तुमच्या आरोग्य सेवा प्रदात्याशी सल्लामसलत करा."
     }
+
+    const msg = error instanceof Error ? error.message : 'Unknown error'
     
     return new Response(
       JSON.stringify({ 
         error: 'Chat service temporarily unavailable',
         answer: errorMessages.en,
-        details: error.message
+        details: msg
       }),
       { 
         status: 500, 

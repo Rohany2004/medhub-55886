@@ -129,7 +129,8 @@ Provide comprehensive and accurate medical information. If you're not certain ab
 
   } catch (error) {
     console.error('Error in generate-medicine-details function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
