@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,11 +13,19 @@ serve(async (req) => {
   }
 
   try {
-    const { medicineName, imageBase64 } = await req.json();
-    
-    if (!medicineName && !imageBase64) {
-      throw new Error('Medicine name or image is required');
+    const body = await req.json();
+    const schema = z.object({
+      medicineName: z.string().trim().min(1).max(200).optional(),
+      imageBase64: z.string().min(100).max(10000000).optional(),
+    }).refine((d) => !!d.medicineName || !!d.imageBase64, { message: 'Medicine name or image is required' });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
+    const { medicineName, imageBase64 } = parsed.data;
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
@@ -91,6 +100,12 @@ Provide comprehensive and accurate medical information. If you're not certain ab
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Gemini API Error:', response.status, errorText);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again shortly.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
       throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
     }
 

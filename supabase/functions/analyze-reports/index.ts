@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +13,18 @@ serve(async (req) => {
   }
 
   try {
-    const { files } = await req.json();
+    const body = await req.json();
+    const schema = z.object({
+      files: z.array(z.string().min(100).max(10000000)).min(1).max(5),
+    });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { files } = parsed.data;
     
     if (!files || files.length === 0) {
       throw new Error('No files provided');
@@ -99,6 +111,12 @@ Analyze the document thoroughly and provide valuable insights that help patients
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Gemini API Error:', response.status, errorText);
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again shortly.');
+        }
+        if (response.status === 402) {
+          throw new Error('Payment required. Please add credits to your workspace.');
+        }
         throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
       }
 

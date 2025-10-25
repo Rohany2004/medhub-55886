@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { z } from "https://deno.land/x/zod/mod.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,7 +13,16 @@ serve(async (req) => {
   }
 
   try {
-    const { content, targetLanguage, contentType } = await req.json()
+    const body = await req.json()
+    const schema = z.discriminatedUnion('contentType', [
+      z.object({ contentType: z.literal('text'), content: z.string().trim().min(1).max(5000), targetLanguage: z.enum(['hi','mr']) }),
+      z.object({ contentType: z.literal('analysis'), content: z.record(z.any()), targetLanguage: z.enum(['hi','mr']) })
+    ])
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const { content, targetLanguage, contentType } = parsed.data
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
 
     if (!geminiApiKey) {
@@ -75,6 +85,12 @@ Please return only the translated text without any additional formatting or expl
     if (!response.ok) {
       const errorText = await response.text()
       console.error('Gemini API error:', errorText)
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again shortly.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
       throw new Error(`Gemini API error: ${response.status}`)
     }
 

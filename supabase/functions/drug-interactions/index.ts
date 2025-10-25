@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -375,17 +376,13 @@ serve(async (req) => {
   }
 
   try {
-    const { medicines } = await req.json();
-
-    if (!medicines || !Array.isArray(medicines) || medicines.length < 2) {
-      return new Response(
-        JSON.stringify({ error: 'At least 2 medicines required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+    const body = await req.json();
+    const schema = z.object({ medicines: z.array(z.string().trim().min(1).max(100)).min(2).max(20) });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const { medicines } = parsed.data;
 
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

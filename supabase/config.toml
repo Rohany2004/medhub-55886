@@ -1,1 +1,31 @@
 project_id = "oodpmxucntrcultdqfch"
+
+[functions.analyze-medicine]
+verify_jwt = true
+
+[functions.analyze-multiple-medicines]
+verify_jwt = true
+
+[functions.generate-medicine-details]
+verify_jwt = true
+
+[functions.medical-chat-assistant]
+verify_jwt = true
+
+[functions.ai-qa-assistant]
+verify_jwt = true
+
+[functions.symptom-checker]
+verify_jwt = true
+
+[functions.drug-interactions]
+verify_jwt = true
+
+[functions.translate-medical-content]
+verify_jwt = true
+
+[functions.analyze-reports]
+verify_jwt = true
+
+[functions.ocr-prescription]
+verify_jwt = true

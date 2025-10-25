@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,11 +12,13 @@ serve(async (req) => {
   }
 
   try {
-    const { images } = await req.json();
-    
-    if (!images || images.length === 0) {
-      throw new Error('No images provided');
+    const body = await req.json();
+    const schema = z.object({ images: z.array(z.string().min(100).max(10000000)).min(1).max(6) });
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return new Response(JSON.stringify({ error: 'Invalid input', details: parsed.error.flatten() }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const { images } = parsed.data;
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {

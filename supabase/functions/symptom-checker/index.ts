@@ -71,6 +71,12 @@ Important: This is for informational purposes only and should not replace profes
     
     if (!response.ok) {
       console.error('Gemini API error:', data);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again shortly.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
       throw new Error(`Gemini API error: ${data.error?.message || 'Unknown error'}`);
     }
 
