@@ -91,6 +91,31 @@ const Auth = () => {
     }
   };
 
+  const handleMagicLink = async () => {
+    if (!email) {
+      toast({ title: 'Email required', description: 'Please enter your email first.' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectUrl }
+      });
+      if (error) throw error;
+      toast({ title: 'Check your inbox', description: 'We sent you a magic sign-in link.' });
+    } catch (error: any) {
+      toast({
+        title: 'Magic link failed',
+        description: error?.message === 'Failed to fetch' ? 'Network/auth service unreachable. Verify Auth URL settings.' : error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-blue-50 to-teal-50">
       <div className="w-full max-w-md">
@@ -171,13 +196,26 @@ const Auth = () => {
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 btn-medical"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                type="submit"
+                className="w-full h-12 btn-medical"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
+              </Button>
+
+              {/* Magic link fallback */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-12"
+                onClick={handleMagicLink}
+                disabled={isLoading}
+              >
+                Send me a magic link
+              </Button>
+            </div>
           </form>
 
           <div className="mt-6 text-center">
