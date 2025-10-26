@@ -120,11 +120,14 @@ const ManualMedicineEntry = () => {
         imageBase64 = await base64Promise;
       }
 
+      // Build payload conditionally to satisfy backend validation
+      const payload: Record<string, any> = {};
+      const name = (form.getValues('medicine_name') || '').trim();
+      if (name) payload.medicineName = name;
+      if (imageBase64) payload.imageBase64 = imageBase64;
+
       const { data, error } = await supabase.functions.invoke('generate-medicine-details', {
-        body: { 
-          medicineName: form.getValues('medicine_name') || '',
-          imageBase64: imageBase64 || undefined
-        }
+        body: payload
       });
 
       if (error) throw error;
@@ -143,10 +146,19 @@ const ManualMedicineEntry = () => {
       });
     } catch (error) {
       console.error('Error generating details:', error);
+      const msg = (error as any)?.message || 'Unable to generate medicine details. Please try again.';
+      let description = msg;
+      if (msg.includes('Rate limit') || msg.includes('429')) {
+        description = 'AI rate limit exceeded. Please wait a moment and try again.';
+      } else if (msg.includes('Payment required') || msg.includes('402')) {
+        description = 'AI credits exhausted. Please add credits to your workspace.';
+      } else if (msg.includes('Invalid input')) {
+        description = 'Please enter a valid name or upload a clear photo and try again.';
+      }
       toast({
-        title: "Generation Failed",
-        description: "Unable to generate medicine details. Please try again.",
-        variant: "destructive",
+        title: 'Generation Failed',
+        description,
+        variant: 'destructive',
       });
     } finally {
       setIsGeneratingDetails(false);
