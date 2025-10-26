@@ -2,3 +2,12 @@ project_id = "oodpmxucntrcultdqfch"
 
 [functions.analyze-reports]
 verify_jwt = false
+
+[functions.ocr-prescription]
+verify_jwt = false
+
+[functions.analyze-medicine]
+verify_jwt = false
+
+[functions.analyze-multiple-medicines]
+verify_jwt = false

@@ -36,9 +36,9 @@ serve(async (req) => {
     }
     const token = authHeader.replace('Bearer ', '');
 
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -71,8 +71,9 @@ serve(async (req) => {
     
     const imageBase64 = btoa(chunks.join(''));
 
-    const prompt = `You are a medical prescription OCR system. Analyze this prescription image and extract the following information in a structured JSON format:
+    const systemPrompt = `You are a medical prescription OCR system. Analyze this prescription image and extract the following information in a structured JSON format.
 
+Return ONLY valid JSON in this exact schema with no prose before or after:
 {
   "extractedText": "Full OCR text from the prescription",
   "doctorName": "Doctor's name if found",
@@ -92,38 +93,69 @@ serve(async (req) => {
 
 Extract all visible text first, then identify and structure the medical information. Be accurate and only include information that is clearly visible in the image.`;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+    const payload = {
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Analyze this prescription image and extract all information.' },
+            { type: 'image_url', image_url: `data:image/jpeg;base64,${imageBase64}` }
+          ]
+        }
+      ]
+    } as const;
+
+    console.log('Analyzing prescription with Lovable AI (gemini-2.5-flash)...');
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              },
-              {
-                inline_data: {
-                  mime_type: "image/jpeg",
-                  data: imageBase64
-                }
-              }
-            ]
-          }
-        ]
-      })
+      body: JSON.stringify(payload),
     });
 
-    const data = await response.json();
-    
     if (!response.ok) {
-      console.error('Gemini API error:', data);
-      throw new Error(`Gemini API error: ${data.error?.message || 'Unknown error'}`);
+      const errorText = await response.text();
+      console.error('AI Gateway Error:', response.status, errorText);
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ 
+          error: 'AI rate limit exceeded. Please wait and try again.',
+          extractedText: "Rate limit exceeded",
+          doctorName: null,
+          patientName: null,
+          prescriptionDate: null,
+          diagnosis: null,
+          medicines: []
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ 
+          error: 'AI credits exhausted. Please add credits to your workspace.',
+          extractedText: "Credits exhausted",
+          doctorName: null,
+          patientName: null,
+          prescriptionDate: null,
+          diagnosis: null,
+          medicines: []
+        }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      throw new Error(`AI Gateway Error: ${response.status} ${response.statusText}`);
     }
 
-    const content = data.candidates[0].content.parts[0].text;
+    const data = await response.json();
+    console.log('AI gateway response received');
+
+    const content: string | undefined = data.choices?.[0]?.message?.content;
     
     // Try to parse JSON from the response
     let analysisResult;
