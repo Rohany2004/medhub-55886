@@ -27,92 +27,76 @@ serve(async (req) => {
     }
     const { medicineName, imageBase64 } = parsed.data;
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('Gemini API key not configured');
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Generating medicine details with Gemini API...');
+    console.log('Generating medicine details with Lovable AI...');
 
-    let prompt = '';
-    let requestBody: any = {
-      contents: [{
-        parts: []
-      }],
-      generationConfig: {
-        temperature: 0.3,
-        topK: 32,
-        topP: 1,
-        maxOutputTokens: 1024,
-      }
-    };
+    const systemPrompt = `You are a medical expert AI. Provide detailed medicine information in JSON format.
 
-    if (imageBase64) {
-      // If image is provided, analyze image for medicine details
-      prompt = `You are a medical expert AI. Analyze this medicine image and provide detailed information in JSON format.
-
-Required JSON format:
+Return ONLY valid JSON in this exact schema with no prose before or after:
 {
   "medicine_name": "Brand/trade name of the medicine",
   "use_case": "Primary medical conditions this medicine treats (e.g., Pain relief, Antibiotic, Blood pressure)",
   "daily_dosage": "Typical dosage instructions (e.g., 1 tablet twice daily after meals)",
-  "manufacturer": "Company/manufacturer name",
+  "manufacturer": "Company/manufacturer name (or 'Various manufacturers' if unknown)",
   "additional_notes": "Important side effects, precautions, or storage instructions"
 }
 
-Provide comprehensive and accurate medical information based on the image.`;
+Provide comprehensive and accurate medical information. If analyzing an image, extract visible details. If given only a name, provide general information for that medication.`;
 
-      requestBody.contents[0].parts = [
-        { text: prompt },
+    let messages: any[];
+    
+    if (imageBase64) {
+      // If image is provided, analyze image for medicine details
+      messages = [
+        { role: 'system', content: systemPrompt },
         {
-          inlineData: {
-            mimeType: "image/jpeg",
-            data: imageBase64
-          }
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Analyze this medicine image and provide detailed information.' },
+            { type: 'image_url', image_url: `data:image/jpeg;base64,${imageBase64}` }
+          ]
         }
       ];
     } else {
       // If only medicine name is provided, generate details based on name
-      prompt = `You are a medical expert AI. Based on the medicine name "${medicineName}", provide detailed information in JSON format.
-
-Required JSON format:
-{
-  "medicine_name": "${medicineName}",
-  "use_case": "Primary medical conditions this medicine treats (e.g., Pain relief, Antibiotic, Blood pressure)",
-  "daily_dosage": "Typical dosage instructions (e.g., 1 tablet twice daily after meals)",
-  "manufacturer": "Common manufacturer name (if known, otherwise 'Various manufacturers')",
-  "additional_notes": "Important side effects, precautions, or storage instructions"
-}
-
-Provide comprehensive and accurate medical information. If you're not certain about specific details, provide general information for that type of medication.`;
-
-      requestBody.contents[0].parts = [{ text: prompt }];
+      messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Provide detailed information for the medicine: ${medicineName}` }
+      ];
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${geminiApiKey}`, {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages
+      }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API Error:', response.status, errorText);
+      console.error('AI Gateway Error:', response.status, errorText);
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again shortly.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ error: 'AI rate limit exceeded. Please wait and try again.' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'Payment required. Please add credits to your workspace.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        return new Response(JSON.stringify({ error: 'AI credits exhausted. Please add credits to your workspace.' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       }
-      throw new Error(`Gemini API Error: ${response.status} ${response.statusText}`);
+      throw new Error(`AI Gateway Error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('Gemini API response received');
+    console.log('AI Gateway response received');
     
-    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const textResponse = data.choices?.[0]?.message?.content as string | undefined;
     
     if (textResponse) {
       // Try to extract JSON from the response

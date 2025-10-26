@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.analyze-multiple-medicines]
 verify_jwt = false
+
+[functions.generate-medicine-details]
+verify_jwt = false
