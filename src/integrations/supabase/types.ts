@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -919,11 +919,11 @@ export type Database = {
     Functions: {
       calculate_next_reminder_time: {
         Args: {
-          reminder_id: string
-          frequency: string
-          reminder_time: string
-          days_of_week: number[]
           custom_schedule: Json
+          days_of_week: number[]
+          frequency: string
+          reminder_id: string
+          reminder_time: string
         }
         Returns: string
       }
