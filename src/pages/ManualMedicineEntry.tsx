@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Navigation from '@/components/Navigation';
-import { Pill, Upload, Sparkles, CalendarIcon, Camera, DollarSign } from 'lucide-react';
+import { Pill, Upload, Sparkles, CalendarIcon, Camera, IndianRupee } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -419,7 +419,7 @@ const ManualMedicineEntry = () => {
                           <FormLabel>Price</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                              <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                               <Input placeholder="0.00" className="pl-10" {...field} />
                             </div>
                           </FormControl>
