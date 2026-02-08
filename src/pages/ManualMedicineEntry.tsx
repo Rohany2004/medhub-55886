@@ -120,9 +120,10 @@ const ManualMedicineEntry = () => {
         imageBase64 = await base64Promise;
       }
 
+      const medicineName = form.getValues('medicine_name')?.trim();
       const { data, error } = await supabase.functions.invoke('generate-medicine-details', {
         body: { 
-          medicineName: form.getValues('medicine_name') || '',
+          medicineName: medicineName || undefined,
           imageBase64: imageBase64 || undefined
         }
       });
