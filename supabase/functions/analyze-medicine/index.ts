@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { z } from "https://deno.land/x/zod/mod.ts";
 
 const corsHeaders = {
@@ -13,6 +14,32 @@ serve(async (req) => {
   }
 
   try {
+    // Auth check: require valid bearer token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized - Please sign in to use this feature' }), { 
+        status: 401, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+    const token = authHeader.replace('Bearer ', '');
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // Verify user from token
+    const authClient = createClient(supabaseUrl, supabaseAnon);
+    const { data: userData, error: userErr } = await authClient.auth.getUser(token);
+    if (userErr || !userData?.user) {
+      console.error('Auth error:', userErr);
+      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid or expired session' }), { 
+        status: 401, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
+
+    console.log('Authenticated user:', userData.user.id);
+
     const body = await req.json();
     const schema = z.object({ imageBase64: z.string().min(100).max(10000000) });
     const parsed = schema.safeParse(body);

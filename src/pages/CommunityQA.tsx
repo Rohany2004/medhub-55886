@@ -26,8 +26,10 @@ const CommunityQA = () => {
 
   const fetchQuestions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('questions')
+      // Use the public view that excludes user_id for privacy
+      // Cast to 'any' since the view isn't in generated types
+      const { data, error } = await (supabase as any)
+        .from('questions_public')
         .select('*')
         .order('created_at', { ascending: false });
 
