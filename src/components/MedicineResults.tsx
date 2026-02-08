@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Plus, Check, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface MedicineInfo {
   name?: string;
@@ -27,6 +32,61 @@ const MedicineResults: React.FC<MedicineResultsProps> = ({
   isLoading, 
   uploadedImage 
 }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+
+  const handleAddToMyMedicines = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save medicines to your collection.",
+        variant: "destructive",
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!medicineInfo?.name) {
+      toast({
+        title: "Cannot save",
+        description: "Medicine name is required to save.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase.from('medicine_entries').insert({
+        user_id: user.id,
+        medicine_name: medicineInfo.name,
+        manufacturer: medicineInfo.manufacturer || null,
+        use_case: medicineInfo.uses?.join(', ') || null,
+        daily_dosage: medicineInfo.dosage || null,
+        additional_notes: medicineInfo.storage || null,
+      });
+
+      if (error) throw error;
+
+      setIsSaved(true);
+      toast({
+        title: "Medicine saved!",
+        description: `${medicineInfo.name} has been added to your medicines.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to save",
+        description: error.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="w-full max-w-4xl mx-auto animate-fade-in">
@@ -75,11 +135,28 @@ const MedicineResults: React.FC<MedicineResultsProps> = ({
           {/* Basic Information */}
           <Card className="glass-card hover-lift">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <CardTitle className="text-xl">Medicine Information</CardTitle>
-                {medicineInfo.prescription_required && (
-                  <Badge variant="destructive">Prescription Required</Badge>
-                )}
+                <div className="flex items-center gap-2">
+                  {medicineInfo.prescription_required && (
+                    <Badge variant="destructive">Prescription Required</Badge>
+                  )}
+                  <Button
+                    onClick={handleAddToMyMedicines}
+                    disabled={isSaving || isSaved}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isSaved ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Plus className="h-4 w-4" />
+                    )}
+                    {isSaved ? 'Saved' : 'Add to My Medicines'}
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
